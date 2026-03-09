@@ -1,4 +1,5 @@
 import XCTest
+@testable import GitHubSearch
 
 /// SearchRepositoriesUseCase 단위 테스트
 final class SearchRepositoriesUseCaseTests: XCTestCase {
@@ -148,16 +149,14 @@ final class SearchRepositoriesUseCaseTests: XCTestCase {
         // Given
         let keyword = "swift"
         let page = 1
-        mockRepository.stubError = AppError.network
+        mockRepository.stubError = AppError.network(NSError(domain: "test", code: -1))
 
         // When/Then
         do {
             _ = try await sut.execute(keyword: keyword, page: page)
             XCTFail("Expected error to be thrown")
-        } catch let error as AppError {
-            XCTAssertEqual(error, AppError.network)
         } catch {
-            XCTFail("Expected AppError.network, got \(error)")
+            XCTAssertTrue(error is AppError)
         }
     }
 

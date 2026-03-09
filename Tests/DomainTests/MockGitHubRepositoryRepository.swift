@@ -1,4 +1,5 @@
 import Foundation
+@testable import GitHubSearch
 
 /// 테스트용 Mock GitHubRepositoryRepository
 final class MockGitHubRepositoryRepository: GitHubRepositoryRepository {

@@ -22,7 +22,17 @@
       "WebFetch(domain:getupnote.com)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(claude:*)",
+      "Bash(git reset:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(mcp list:*)",
+      "Bash(node:*)",
+      "Bash(git status:*)",
+      "Bash(swift test:*)",
+      "Bash(/Users/rainyi/Documents/Project/Study/SearchGitHub/Package.swift:*)",
+      "Bash(swift build:*)"
     ]
   }
 }

@@ -61,15 +61,15 @@ extension GitHubRepositoryDTO {
             id: id,
             name: name,
             fullName: fullName,
-            owner: GitHubRepository.Owner(
+            owner: RepositoryOwner(
                 login: owner.login,
                 avatarUrl: avatarURL
             ),
-            description: description,
             htmlUrl: htmlURL,
-            starsCount: stargazersCount,
+            description: description,
+            stargazersCount: stargazersCount,
             language: language,
-            forksCount: forksCount
+            updatedAt: nil
         )
     }
 }

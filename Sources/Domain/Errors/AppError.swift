@@ -164,7 +164,7 @@ extension AppError {
         switch self {
         case .network, .invalidResponse, .decoding, .rateLimit, .serverError:
             return true
-        case .emptyQuery, .emptyResult, .unknown, .unauthorized, .forbidden:
+        case .emptyQuery, .emptyResult, .unknown, .unauthorized, .forbidden, .invalidParameter:
             return false
         }
     }
