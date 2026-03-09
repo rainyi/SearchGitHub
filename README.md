@@ -197,6 +197,25 @@ swift test --filter PresentationTests
 swift test --enable-code-coverage
 ```
 
+### UI 테스트 실행 (Xcode 필요)
+
+**참고**: UI 테스트는 실제 iOS 앱이 필요하므로 Xcode에서 실행해야 합니다.
+
+```bash
+# 1. Package.swift를 Xcode에서 열기
+open Package.swift
+
+# 2. 테스트할 시뮬레이터 선택 (iPhone 16 권장)
+
+# 3. Product > Test (⌘+U) 로 테스트 실행
+#    또는 Test Navigator에서 개별 UI 테스트 실행
+```
+
+**UI 테스트 주의사항**:
+- UI 테스트는 GitHub API에 실제로 네트워크 요청을 볩니다
+- Rate Limit에 주의하세요 (시간당 60회 제한)
+- 테스트 전 시뮬레이터를 리셋하면 최근 검색어가 초기화됩니다
+
 ---
 
 ## 6. 아키텍처 / 설계

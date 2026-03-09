@@ -1,6 +1,6 @@
 import SwiftUI
 
-// @main - 테스트를 위해 주석 처리 (실제 앱 빌드 시 활성화)
+@main
 struct GitHubSearchApp: App {
 
     @StateObject private var router = AppRouter()

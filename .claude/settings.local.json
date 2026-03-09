@@ -35,7 +35,11 @@
       "Bash(swift build:*)",
       "Bash(python3:*)",
       "Bash(llvm-cov report:*)",
-      "Bash(xcrun llvm-cov:*)"
+      "Bash(xcrun llvm-cov:*)",
+      "Bash(swift package:*)",
+      "Bash(open:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun xcresulttool:*)"
     ]
   }
 }
