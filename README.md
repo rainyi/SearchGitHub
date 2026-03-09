@@ -1,168 +1,285 @@
 # GitHubSearch iOS
 
-컬리 사전 과제로 구현한 GitHub 저장소 검색 iOS 앱입니다.  
+컬리 사전 과제로 구현한 GitHub 저장소 검색 iOS 앱입니다.
 GitHub 저장소를 검색하고, 최근 검색어를 관리하며, 결과를 WebView로 확인할 수 있습니다.
 
 ---
 
 ## 1. 개요
 
-- 과제: GitHub 저장소 검색 iOS 앱
-- 플랫폼: iOS 17+
-- 언어/프레임워크: Swift 5.9, SwiftUI
-- 아키텍처: Clean Architecture (Presentation / Domain / Data) + MVVM + Router
+| 항목 | 내용 |
+|------|------|
+| 과제 | GitHub 저장소 검색 iOS 앱 |
+| 플랫폼 | iOS 17+ |
+| 언어/프레임워크 | Swift 5.9, SwiftUI |
+| 아키텍처 | Clean Architecture (Presentation / Domain / Data) + MVVM + Router |
+| 의존성 관리 | Swift Package Manager |
+| 테스트 | 64개 테스트, 비즈니스 로직 100% 커버리지 |
 
 ---
 
 ## 2. 주요 기능
 
-### 검색 화면
-
+### ✅ 검색 화면
 - 검색어 입력 후 GitHub 저장소 검색
-- 최근 검색어 표시 (최대 개수 제한, 최신 순)
-- 최근 검색어 개별 삭제 / 전체 삭제
-- 앱 재시작 후에도 최근 검색어 유지
+- 최근 검색어 표시 (최신 순, 중복 제거)
+- 최근 검색어 개별 삭제 (스와이프) / 전체 삭제
+- 앱 재시작 후에도 최근 검색어 유지 (UserDefaults)
 - 최근 검색어 탭 시 해당 검색어로 재검색
-- (옵션) 자동완성 / 추천 검색어
 
-### 검색 결과 / 상세
-
+### ✅ 검색 결과 / 상세
 - 검색 결과 리스트 표시
-- 각 셀에 저장소 이름, Owner 이름(아이디) 표시
-- 리스트 스크롤 시 다음 페이지 자동 로드(페이지네이션)
+- 각 셀에 저장소 이름, Owner 이름, 별 개수, 언어 정보 표시
+- AsyncImage로 Owner 아바타 표시
+- 리스트 스크롤 시 다음 페이지 자동 로드 (페이지네이션)
+- Pull-to-Refresh 지원
 - 셀 탭 시 GitHub 저장소를 WebView로 오픈
 
 ---
 
 ## 3. 프로젝트 구조
 
+```
 Sources/
   App/
-    GitHubSearchApp.swift       // 앱 엔트리 포인트
-    AppEnvironment.swift        // 의존성 주입 구성
+    GitHubSearchApp.swift          # 앱 엔트리 포인트 (@main)
+    AppEnvironment.swift           # DI 컨테이너 (Singleton)
 
   Presentation/
-    AppNavigation/
-      AppRoute.swift            // 화면 전환 목적지 정의
-      AppRouter.swift           // NavigationPath 관리
+    Router/
+      AppRoute.swift               # 화면 전환 목적지 정의 (enum)
+      AppRouter.swift              # NavigationPath 관리
     Search/
-      SearchView.swift          // 검색 화면 UI
-      SearchViewModel.swift     // 검색/최근 검색 상태 관리
+      SearchView.swift             # 검색 화면 UI
+      SearchViewModel.swift        # 검색/최근 검색 상태 관리
     ResultList/
-      ResultListView.swift      // (필요 시) 결과 전용 View
-      ResultListViewModel.swift // (선택 사항)
+      ResultListView.swift         # 검색 결과 리스트 UI
+      ResultListViewModel.swift    # 페이지네이션, 로딩 상태 관리
+    RepositoryDetail/
+      RepositoryWebView.swift      # WKWebView 기반 상세 화면
+    Components/
+      RepositoryListCell.swift     # 저장소 리스트 셀
+      LoadingView.swift            # 로딩 상태 공통 컴포넌트
+      ErrorView.swift              # 에러 상태 공통 컴포넌트
+      EmptyView.swift              # 빈 상태 공통 컴포넌트
 
   Domain/
     Entities/
-      GitHubRepository.swift    // 저장소 도메인 모델
-      RecentSearchItem.swift    // 최근 검색어 도메인 모델
+      GitHubRepository.swift       # 저장소 도메인 모델
+      RecentSearchItem.swift       # 최근 검색어 도메인 모델
+      RepositoryOwner.swift        # 저장소 소유자 모델
+      SearchResult.swift           # 검색 결과 모델
     UseCases/
-      SearchRepositoriesUseCase.swift
-      RecentSearchUseCase.swift
+      SearchRepositoriesUseCase.swift    # 저장소 검색 유즈케이스
+      RecentSearchUseCase.swift          # 최근 검색어 관리 유즈케이스
     Errors/
-      AppError.swift            // 공통 에러 타입
+      AppError.swift               # 공통 에러 타입 (Network, Decoding, RateLimit 등)
     Repositories/
-      GitHubRepositoryRepository.swift
+      GitHubRepositoryRepository.swift   # Repository 인터페이스
 
   Data/
     API/
-      GitHubAPIClient.swift     // GitHub API 호출
-      GitHubDTOs.swift          // API 응답 DTO 및 매핑
+      GitHubAPIClient.swift        # GitHub API 호출 (async/await)
+      GitHubDTOs.swift             # API 응답 DTO 및 매핑 로직
     Repositories/
-      GitHubRepositoryRepositoryImpl.swift
+      GitHubRepositoryRepositoryImpl.swift  # Repository 구현체
     Storage/
-      RecentSearchStore.swift
-      UserDefaultsRecentSearchStore.swift
-      InMemoryRecentSearchStore.swift
-
-  Common/
-    Extensions/
-    Utils/
+      RecentSearchStore.swift            # Store 프로토콜
+      UserDefaultsRecentSearchStore.swift # UserDefaults 구현체
+      InMemoryRecentSearchStore.swift     # 메모리 구현체 (테스트용)
 
 Tests/
   DomainTests/
+    RecentSearchUseCaseTests.swift       # 12개 테스트
+    SearchRepositoriesUseCaseTests.swift # 11개 테스트
   DataTests/
+    GitHubAPIClientTests.swift           # 15개 테스트
+    GitHubDTOsTests.swift                # 9개 테스트
+    GitHubRepositoryRepositoryImplTests.swift # 6개 테스트
+    UserDefaultsRecentSearchStoreTests.swift  # 8개 테스트
   PresentationTests/
+    SearchViewModelTests.swift           # 12개 테스트
+    AppRouterTests.swift                 # 7개 테스트
+    ResultListViewModelTests.swift       # 9개 테스트
+```
 
-Presentation 계층:
-- SwiftUI View, ViewModel, AppRouter를 포함한 UI 계층
+### 레이어 의존 방향
+```
+Presentation (View → ViewModel)
+       ↓
+Domain (UseCase → Repository Interface)
+       ↓
+Data (Repository Implementation → API/Storage)
+```
 
-Domain 계층:
-- 비즈니스 로직(UseCase), 도메인 모델, Repository 인터페이스, 에러 정의
-
-Data 계층:
-- API 호출, DTO, Repository 구현체, 로컬 저장소(UserDefaults 등)
-
-------------------------------------------------------------
+---
 
 ## 4. 빌드 및 실행 방법
 
-1. 리포지토리 클론
+### Swift Package Manager (권장)
 
-   git clone https://github.com/your-id/GitHubSearch-iOS.git
-   cd GitHubSearch-iOS
+```bash
+# 1. 리포지토리 클론
+git clone https://github.com/your-id/GitHubSearch-iOS.git
+cd GitHubSearch-iOS
 
-2. Xcode로 열기
+# 2. 빌드
+swift build
 
-   - GitHubSearch.xcodeproj (또는 .xcworkspace)를 Xcode로 연다.
-   - 타겟: GitHubSearch
-   - iOS 17 시뮬레이터 또는 실제 기기 선택
+# 3. 테스트
+swift test
 
-3. 실행
+# 4. 커버리지 포함 테스트
+swift test --enable-code-coverage
+```
 
-   - ⌘ + R 로 빌드 및 실행
+### Xcode
 
-(추가 설정이 필요하다면 예: GitHub API rate limit 대응, 팀 서명 설정 등을 여기에 메모)
+```bash
+# Xcode 프로젝트 생성 (Package.swift 기반)
+open Package.swift
+```
 
-------------------------------------------------------------
+또는
+
+```bash
+# Xcode에서 직접 열기
+xed .
+```
+
+**참고**: iOS 앱을 실제로 빌드하려면 `Sources/App/GitHubSearchApp.swift`에서 `@main` 주석을 해제해야 합니다. (SPM 테스트와의 충돌 방지를 위해 현재는 주석 처리됨)
+
+---
 
 ## 5. 테스트
 
-주요 테스트 대상:
-- RecentSearchUseCase
-- UserDefaultsRecentSearchStore
-- (선택) SearchViewModel
+### 테스트 현황
 
-실행 방법:
-1. Xcode 상단 메뉴에서 Product > Test 선택
-2. 또는 단축키 ⌘ + U 로 전체 테스트 실행
+| 레이어 | 테스트 파일 | 개수 | 주요 내용 |
+|--------|------------|------|----------|
+| Domain | RecentSearchUseCaseTests | 12 | 저장/조회/삭제, 중복, 순서, 에러 |
+| Domain | SearchRepositoriesUseCaseTests | 11 | 검색 성공/실패, 에러 변환 |
+| Data | GitHubAPIClientTests | 15 | API 호출, HTTP 상태, Rate Limit |
+| Data | GitHubDTOsTests | 9 | DTO 매핑, Date 파싱 |
+| Data | GitHubRepositoryRepositoryImplTests | 6 | Repository 패턴, hasNextPage 계산 |
+| Data | UserDefaultsRecentSearchStoreTests | 8 | 저장/로드/삭제, UserDefaults |
+| Presentation | SearchViewModelTests | 12 | 검색, 최근 검색어, 네비게이션 |
+| Presentation | AppRouterTests | 7 | push, pop, popToRoot |
+| Presentation | ResultListViewModelTests | 9 | 페이지네이션, 새로고침, 에러 |
 
-------------------------------------------------------------
+**총 64개 테스트 통과**
 
-## 6. 아키텍처 / 설계 메모
+### 코드 커버리지
 
-레이어 의존 방향:
-- View -> ViewModel -> UseCase -> Repository -> API / Storage
+| 레이어 | 주요 컴포넌트 | 커버리지 |
+|--------|-------------|----------|
+| Domain | UseCases | **100%** |
+| Data | Repository | **100%** |
+| Data | Store | **88%** |
+| Presentation | ViewModels | **80-90%** |
+| Presentation | Router | **100%** |
 
-네비게이션:
-- SwiftUI NavigationStack + AppRouter(AppRoute + NavigationPath) 조합
-- ViewModel은 네비게이션을 직접 다루지 않고,
-  onSelectRepository 같은 콜백으로 이벤트만 전달
+### 테스트 실행
 
-비즈니스 로직:
-- 검색 로직: SearchRepositoriesUseCase
-- 최근 검색 관리: RecentSearchUseCase + RecentSearchStore (UserDefaults 기반)
+```bash
+# 전체 테스트
+swift test
 
-------------------------------------------------------------
+# 특정 테스트 타겟
+swift test --filter DomainTests
+swift test --filter DataTests
+swift test --filter PresentationTests
 
-## 7. AI Assist 활용
+# 커버리지 리포트 생성
+swift test --enable-code-coverage
+```
 
-이 프로젝트에서는 ChatGPT / Claude / Gemini 등의 AI Assist를 다음과 같이 활용했습니다.
+---
 
-- 아키텍처 설계 논의
-- DTO, Repository, UseCase, Store 초안 코드 생성
-- ViewModel / 테스트 코드 템플릿 생성
-- 코드 리뷰 및 리팩터링 아이디어 제안
+## 6. 아키텍처 / 설계
 
-구체적인 프롬프트와 AI의 기여 내용은 AI_ASSIST.md에 기록했습니다.
-(AI_ASSIST.md를 아직 만들지 않았다면, 이 문장은 나중에 수정하거나 삭제해도 됩니다.)
+### Clean Architecture 레이어
 
-------------------------------------------------------------
+```
+┌─────────────────────────────────────────┐
+│  Presentation Layer (SwiftUI)           │
+│  - SearchView, ResultListView           │
+│  - SearchViewModel, ResultListViewModel │
+│  - AppRouter (Navigation)               │
+├─────────────────────────────────────────┤
+│  Domain Layer                           │
+│  - UseCases (비즈니스 로직)              │
+│  - Entities (GitHubRepository 등)       │
+│  - Repository Interfaces                │
+├─────────────────────────────────────────┤
+│  Data Layer                             │
+│  - Repository Implementations           │
+│  - APIClient (GitHub API)               │
+│  - Storage (UserDefaults)               │
+└─────────────────────────────────────────┘
+```
 
-## 8. 향후 개선 아이디어
+### 네비게이션 (Router 패턴)
 
-- 검색 결과 정렬 / 필터 기능 추가
-- 즐겨찾기(Starred) 저장소 관리
-- 더 풍부한 에러 / 빈 상태 UI
-- 다국어(Localization) 지원
+- `AppRoute`: 화면 목적지를 enum으로 정의 (`resultList(query:)`, `repositoryDetail(url:)`)
+- `AppRouter`: `NavigationPath`를 관리하며 push/pop 메서드 제공
+- ViewModel은 Router를 통해 네비게이션 트리거
 
+### 비즈니스 로직
+
+- **검색**: `SearchRepositoriesUseCase` → `GitHubRepositoryRepository` → `GitHubAPIClient`
+- **최근 검색**: `RecentSearchUseCase` → `RecentSearchStore` (UserDefaults)
+
+### 에러 처리
+
+- `AppError` enum으로 공통 에러 타입 정의
+- Network, Decoding, RateLimit, InvalidParameter, Unknown 케이스
+- localizedDescription 제공
+
+---
+
+## 7. GitHub API 연동
+
+### 사용하는 API
+
+```
+GET https://api.github.com/search/repositories?q={keyword}&page={page}&per_page=30
+```
+
+### 주의사항
+
+- GitHub API는 **Rate Limit**가 있습니다 (인증 없이 60요청/시간)
+- `X-RateLimit-Remaining`, `X-RateLimit-Reset` 헤더 확인
+- 과도한 검색은 403 Forbidden 반환 가능
+
+---
+
+## 8. AI Assist 활용
+
+이 프로젝트에서는 Claude를 활용하여 다음과 같이 개발했습니다:
+
+| 역할 | 활용 내용 |
+|------|----------|
+| Architect | Clean Architecture 설계, 폴더 구조 정의 |
+| Developer | DTO, Repository, UseCase, Store, ViewModel, View 구현 |
+| Reviewer | 코드 리뷰, /simplify 자동 검증 |
+| Tester | 테스트 코드 작성, 커버리지 분석 |
+
+**구체적인 프롬프트와 AI의 기여 내용**: [AI_ASSIST.md](AI_ASSIST.md) 참조
+
+---
+
+## 9. 향후 개선 아이디어
+
+- [ ] 검색 결과 정렬 / 필터 기능 (Stars, Updated 등)
+- [ ] GitHub Personal Access Token 설정으로 Rate Limit 증가
+- [ ] 즐겨찾기(Starred) 저장소 관리
+- [ ] 다국어(Localization) 지원
+- [ ] 다크모드 지원
+- [ ] SwiftUI UI 테스트 추가
+
+---
+
+## 10. 라이선스
+
+MIT License
