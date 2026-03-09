@@ -13,18 +13,27 @@ enum AppError: Error, Equatable {
     // MARK: - 네트워크
 
     /// 네트워크 연결 실패
-    case network
+    case network(Error)
 
     /// GitHub API Rate Limit (429)
     case rateLimit(resetAt: Date)
 
-    /// 잘못된 HTTP 응답 (401, 403, 503 등)
-    case invalidResponse(statusCode: Int)
+    /// 인증 실패 (401)
+    case unauthorized
+
+    /// 접근 금지 (403)
+    case forbidden
+
+    /// 잘못된 HTTP 응답
+    case invalidResponse
+
+    /// 서버 에러 (5xx)
+    case serverError(Int)
 
     // MARK: - 데이터
 
     /// JSON 디코딩 실패
-    case decoding
+    case decoding(Error)
 
     /// 데이터 없음
     case emptyResult
@@ -42,14 +51,26 @@ enum AppError: Error, Equatable {
             return true
         case (.invalidParameter, .invalidParameter):
             return true
-        case (.network, .network):
-            return true
+        case let (.network(lhsError), .network(rhsError)):
+            let lhsNSError = lhsError as NSError
+            let rhsNSError = rhsError as NSError
+            return lhsNSError.domain == rhsNSError.domain &&
+                   lhsNSError.code == rhsNSError.code
         case let (.rateLimit(lhsDate), .rateLimit(rhsDate)):
             return lhsDate == rhsDate
-        case let (.invalidResponse(lhsCode), .invalidResponse(rhsCode)):
-            return lhsCode == rhsCode
-        case (.decoding, .decoding):
+        case (.unauthorized, .unauthorized):
             return true
+        case (.forbidden, .forbidden):
+            return true
+        case (.invalidResponse, .invalidResponse):
+            return true
+        case let (.serverError(lhsCode), .serverError(rhsCode)):
+            return lhsCode == rhsCode
+        case let (.decoding(lhsError), .decoding(rhsError)):
+            let lhsNSError = lhsError as NSError
+            let rhsNSError = rhsError as NSError
+            return lhsNSError.domain == rhsNSError.domain &&
+                   lhsNSError.code == rhsNSError.code
         case (.emptyResult, .emptyResult):
             return true
         case let (.unknown(lhsError), .unknown(rhsError)):
@@ -80,8 +101,17 @@ extension AppError: LocalizedError {
         case .rateLimit:
             return "잠시 후 다시 시도해 주세요"
 
-        case .invalidResponse(let statusCode):
-            return "오류가 발생했습니다 (\(statusCode))"
+        case .unauthorized:
+            return "인증에 실패했습니다"
+
+        case .forbidden:
+            return "접근이 거부되었습니다"
+
+        case .invalidResponse:
+            return "오류가 발생했습니다"
+
+        case .serverError(let statusCode):
+            return "서버 오류가 발생했습니다 (\(statusCode))"
 
         case .decoding:
             return "데이터를 불러올 수 없습니다"
@@ -99,8 +129,14 @@ extension AppError: LocalizedError {
         case .emptyQuery:
             return "검색어를 입력하고 다시 시도해주세요"
 
-        case .network, .invalidResponse, .decoding, .unknown:
+        case .invalidParameter:
+            return "입력값을 확인하고 다시 시도해주세요"
+
+        case .network, .invalidResponse, .decoding, .unknown, .serverError:
             return "잠시 후 다시 시도해주세요"
+
+        case .unauthorized, .forbidden:
+            return "관리자에게 문의해주세요"
 
         case .rateLimit:
             return "1분 후에 다시 시도해주세요"
@@ -126,9 +162,9 @@ extension AppError {
     /// 재시도 가능 여부
     var isRetryable: Bool {
         switch self {
-        case .network, .invalidResponse, .decoding, .rateLimit:
+        case .network, .invalidResponse, .decoding, .rateLimit, .serverError:
             return true
-        case .emptyQuery, .emptyResult, .unknown:
+        case .emptyQuery, .emptyResult, .unknown, .unauthorized, .forbidden:
             return false
         }
     }
