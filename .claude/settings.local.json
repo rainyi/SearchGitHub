@@ -39,7 +39,9 @@
       "Bash(swift package:*)",
       "Bash(open:*)",
       "Bash(xcodebuild:*)",
-      "Bash(xcrun xcresulttool:*)"
+      "Bash(xcrun xcresulttool:*)",
+      "Bash(git push:*)",
+      "Bash(xcrun simctl:*)"
     ]
   }
 }

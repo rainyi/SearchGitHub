@@ -14,7 +14,7 @@ struct SearchView: View {
             searchBar
             content
         }
-        .navigationTitle("GitHub 검색")
+        .navigationTitle("Search")
         .task {
             await viewModel.onAppear()
         }
@@ -24,56 +24,145 @@ struct SearchView: View {
 
     private var searchBar: some View {
         HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
+            // 회색 검색바 (텍스트 입력 시 줄어듦)
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                    .font(.system(size: 17))
 
-            TextField("저장소 검색", text: $viewModel.searchQuery)
-                .focused($isSearchFieldFocused)
-                .textFieldStyle(.plain)
-                .submitLabel(.search)
-                .accessibilityIdentifier("searchTextField")
-                .onSubmit {
-                    Task {
-                        await viewModel.search()
+                TextField("저장소 검색", text: $viewModel.searchQuery)
+                    .focused($isSearchFieldFocused)
+                    .textFieldStyle(.plain)
+                    .submitLabel(.search)
+                    .accessibilityIdentifier("searchTextField")
+                    .onSubmit {
+                        Task {
+                            await viewModel.search()
+                        }
+                    }
+
+                if !viewModel.searchQuery.isEmpty {
+                    // X 버튼 - 텍스트 초기화
+                    Button {
+                        viewModel.searchQuery = ""
+                        if viewModel.hasSearched {
+                            viewModel.clearSearch()
+                        }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray.opacity(0.5))
+                            .font(.system(size: 20))
                     }
                 }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color.gray.opacity(0.15))
+            .cornerRadius(10)
 
+            // 취소 버튼 - 검색바 바깥 (텍스트 입력 시 나타남)
             if !viewModel.searchQuery.isEmpty {
                 Button {
                     viewModel.searchQuery = ""
+                    viewModel.clearSearch()
+                    isSearchFieldFocused = false
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
+                    Text("취소")
+                        .foregroundColor(.red)
+                        .font(.system(size: 16))
                 }
             }
-
-            Button {
-                Task {
-                    await viewModel.search()
-                }
-            } label: {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                } else {
-                    Text("검색")
-                }
-            }
-            .accessibilityIdentifier("searchButton")
-            .disabled(!viewModel.isSearchButtonEnabled)
         }
-        .padding()
-        .background(Color.gray.opacity(0.15))
-        .cornerRadius(10)
-        .padding()
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 
     @ViewBuilder
     private var content: some View {
-        if viewModel.recentSearches.isEmpty {
+        if viewModel.shouldShowResults {
+            searchResultsView
+        } else if viewModel.recentSearches.isEmpty {
             emptyState
         } else {
             recentSearchesList
+        }
+    }
+
+    private var searchResultsView: some View {
+        VStack(spacing: 0) {
+            // 결과 개수 헤더
+            HStack {
+                Text("총 \(viewModel.totalCount)개 결과")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+
+            if viewModel.isSearching && viewModel.repositories.isEmpty {
+                // 로딩 상태
+                Spacer()
+                ProgressView()
+                    .scaleEffect(1.2)
+                Spacer()
+            } else if viewModel.shouldShowError {
+                // 에러 상태
+                Spacer()
+                ErrorView(
+                    message: viewModel.error?.localizedDescription ?? "오류가 발생했습니다",
+                    retryAction: {
+                        Task {
+                            await viewModel.search()
+                        }
+                    }
+                )
+                Spacer()
+            } else if viewModel.shouldShowEmptyState {
+                // 빈 결과 상태
+                Spacer()
+                EmptyView(
+                    icon: "magnifyingglass",
+                    title: "검색 결과가 없습니다",
+                    subtitle: "다른 검색어를 입력핵보세요"
+                )
+                Spacer()
+            } else {
+                // 검색 결과 리스트
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(viewModel.repositories.enumerated()), id: \.element.id) { index, repository in
+                            RepositoryListCell(repository: repository)
+                                .onAppear {
+                                    // 마지막 3개 아이템 중 하나가 보이면 다음 페이지 로드
+                                    let thresholdIndex = viewModel.repositories.count - 3
+                                    if index >= thresholdIndex {
+                                        Task {
+                                            await viewModel.loadNextPage()
+                                        }
+                                    }
+                                }
+                                .onTapGesture {
+                                    viewModel.selectRepository(repository)
+                                }
+
+                            Divider()
+                                .padding(.leading)
+                        }
+
+                        if viewModel.isLoadingMore {
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.white)
+                        }
+                    }
+                }
+                .refreshable {
+                    await viewModel.refresh()
+                }
+            }
         }
     }
 
@@ -86,45 +175,47 @@ struct SearchView: View {
 
     private var recentSearchesList: some View {
         List {
-            Section {
+            Section(header: Text("최근 검색")) {
                 ForEach(viewModel.recentSearches) { item in
-                    Button {
-                        viewModel.selectRecentSearch(item)
-                    } label: {
-                        HStack {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .foregroundColor(.secondary)
+                    HStack(spacing: 0) {
+                        // 검색어 영역 - 탭하면 검색
+                        Button {
+                            viewModel.selectRecentSearch(item)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(item.query)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
 
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(item.query)
-                                    .font(.body)
-                                    .foregroundColor(.primary)
+                                    Text(formattedDate(item.searchedAt))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
 
-                                Text(formattedDate(item.searchedAt))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                Spacer()
                             }
+                        }
+                        .buttonStyle(.plain)
 
-                            Spacer()
-
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
+                        // X 버튼 - 탭하면 삭제
+                        Button {
+                            Task {
+                                await viewModel.deleteRecentSearch(id: item.id)
+                            }
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 12))
                                 .foregroundColor(.secondary)
+                                .frame(width: 16, height: 16)
                         }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 8)
                     }
                 }
-                .onDelete { indexSet in
-                    Task {
-                        for index in indexSet {
-                            guard viewModel.recentSearches.indices.contains(index) else { continue }
-                            let item = viewModel.recentSearches[index]
-                            await viewModel.deleteRecentSearch(id: item.id)
-                        }
-                    }
-                }
-            } header: {
+
+                // 전체 삭제 버튼 - 마지막 검색어 바로 아래
                 HStack {
-                    Text("최근 검색")
                     Spacer()
                     Button {
                         Task {
@@ -133,8 +224,10 @@ struct SearchView: View {
                     } label: {
                         Text("전체 삭제")
                             .font(.caption)
+                            .foregroundColor(.red)
                     }
                 }
+                .listRowBackground(Color.clear)
             }
         }
         .listStyle(.plain)
@@ -155,7 +248,7 @@ struct SearchView: View {
 
 // MARK: - Preview
 
-#Preview {
+#Preview("검색 전") {
     NavigationStack {
         SearchView(
             viewModel: SearchViewModel(
@@ -167,11 +260,98 @@ struct SearchView: View {
     }
 }
 
+#Preview("검색 중 - 텍스트 입력") {
+    NavigationStack {
+        SearchView(
+            viewModel: createSearchViewModelWithText()
+        )
+    }
+}
+
+#Preview("검색 결과") {
+    NavigationStack {
+        SearchView(
+            viewModel: createSearchViewModelWithResults()
+        )
+    }
+}
+
+// MARK: - Preview Helpers
+
+@MainActor
+private func createSearchViewModelWithText() -> SearchViewModel {
+    let viewModel = SearchViewModel(
+        searchUseCase: MockSearchRepositoriesUseCase(),
+        recentSearchUseCase: MockRecentSearchUseCasePreview(),
+        router: AppRouter()
+    )
+    viewModel.searchQuery = "swift"
+    return viewModel
+}
+
+@MainActor
+private func createSearchViewModelWithResults() -> SearchViewModel {
+    let viewModel = SearchViewModel(
+        searchUseCase: MockSearchRepositoriesUseCaseWithResults(),
+        recentSearchUseCase: MockRecentSearchUseCasePreview(),
+        router: AppRouter()
+    )
+    viewModel.searchQuery = "swift"
+    viewModel.hasSearched = true
+    viewModel.totalCount = 100
+    viewModel.hasNextPage = true
+    viewModel.repositories = (1...10).map { index in
+        GitHubRepository(
+            id: index,
+            name: "repo-\(index)",
+            fullName: "user/repo-\(index)",
+            owner: RepositoryOwner(
+                login: "user",
+                avatarUrl: URL(string: "https://avatars.githubusercontent.com/u/1?v=4")!
+            ),
+            htmlUrl: URL(string: "https://github.com/user/repo-\(index)")!,
+            description: "Repository \(index)",
+            stargazersCount: 100 + index,
+            language: "Swift",
+            updatedAt: Date()
+        )
+    }
+    return viewModel
+}
+
 // MARK: - Preview Mocks
 
 private struct MockSearchRepositoriesUseCase: SearchRepositoriesUseCase {
     func execute(keyword: String, page: Int) async throws -> SearchResult {
         SearchResult(repositories: [], totalCount: 0, hasNextPage: false)
+    }
+}
+
+private struct MockSearchRepositoriesUseCaseWithResults: SearchRepositoriesUseCase {
+    func execute(keyword: String, page: Int) async throws -> SearchResult {
+        // 페이지별로 다른 결과 반환하여 페이지네이션 테스트 가능
+        let baseId = (page - 1) * 10
+        let repositories = (1...10).map { index in
+            GitHubRepository(
+                id: baseId + index,
+                name: "repo-\(baseId + index)",
+                fullName: "user/repo-\(baseId + index)",
+                owner: RepositoryOwner(
+                    login: "user",
+                    avatarUrl: URL(string: "https://avatars.githubusercontent.com/u/1?v=4")!
+                ),
+                htmlUrl: URL(string: "https://github.com/user/repo-\(baseId + index)")!,
+                description: "Repository \(baseId + index)",
+                stargazersCount: 100 + baseId + index,
+                language: "Swift",
+                updatedAt: Date()
+            )
+        }
+        return SearchResult(
+            repositories: repositories,
+            totalCount: 100,
+            hasNextPage: page < 10
+        )
     }
 }
 

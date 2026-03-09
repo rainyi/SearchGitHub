@@ -16,16 +16,6 @@ struct ResultListView: View {
         .navigationTitle(viewModel.query)
         #if os(iOS)
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    viewModel.back()
-                } label: {
-                    Image(systemName: "chevron.left")
-                    Text("뒤로")
-                }
-            }
-        }
         #endif
         .task {
             await viewModel.onAppear()

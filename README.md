@@ -20,20 +20,27 @@ GitHub 저장소를 검색하고, 최근 검색어를 관리하며, 결과를 We
 
 ## 2. 주요 기능
 
-### ✅ 검색 화면
+### ✅ 검색 화면 (통합)
 - 검색어 입력 후 GitHub 저장소 검색
+- **같은 화면에서 검색 결과 표시** (별도 화면 전환 없음)
+- 검색바 동적 레이아웃: 텍스트 입력 시 검색바가 줄어들며 취소 버튼 표시
+- 취소 버튼으로 검색 초기화 및 키보드 내림
 - 최근 검색어 표시 (최신 순, 중복 제거)
-- 최근 검색어 개별 삭제 (스와이프) / 전체 삭제
+- 최근 검색어 개별 삭제 (X 버튼) / 전체 삭제
 - 앱 재시작 후에도 최근 검색어 유지 (UserDefaults)
 - 최근 검색어 탭 시 해당 검색어로 재검색
 
-### ✅ 검색 결과 / 상세
-- 검색 결과 리스트 표시
+### ✅ 검색 결과 (SearchView에 통합)
+- 같은 화면에서 검색 결과 리스트 표시
 - 각 셀에 저장소 이름, Owner 이름, 별 개수, 언어 정보 표시
 - AsyncImage로 Owner 아바타 표시
-- 리스트 스크롤 시 다음 페이지 자동 로드 (페이지네이션)
+- 스크롤 시 다음 페이지 자동 로드 (페이지네이션)
 - Pull-to-Refresh 지원
 - 셀 탭 시 GitHub 저장소를 WebView로 오픈
+
+### ✅ 저장소 상세 화면
+- WKWebView로 GitHub 저장소 페이지 표시
+- NavigationStack 기반 뒤로가기 지원
 
 ---
 
@@ -47,14 +54,14 @@ Sources/
 
   Presentation/
     Router/
-      AppRoute.swift               # 화면 전환 목적지 정의 (enum)
+      AppRoute.swift               # 화면 전환 목적지 정의 (enum) - repositoryDetail만 사용
       AppRouter.swift              # NavigationPath 관리
     Search/
-      SearchView.swift             # 검색 화면 UI
-      SearchViewModel.swift        # 검색/최근 검색 상태 관리
-    ResultList/
-      ResultListView.swift         # 검색 결과 리스트 UI
-      ResultListViewModel.swift    # 페이지네이션, 로딩 상태 관리
+      SearchView.swift             # 검색 화면 UI (검색 + 결과 통합)
+      SearchViewModel.swift        # 검색/최근 검색/검색 결과 상태 관리
+    ResultList/                    # (Legacy) 별도 결과 화면 - 현재 미사용
+      ResultListView.swift
+      ResultListViewModel.swift
     RepositoryDetail/
       RepositoryWebView.swift      # WKWebView 기반 상세 화면
     Components/
@@ -243,13 +250,15 @@ open Package.swift
 
 ### 네비게이션 (Router 패턴)
 
-- `AppRoute`: 화면 목적지를 enum으로 정의 (`resultList(query:)`, `repositoryDetail(url:)`)
+- `AppRoute`: 화면 목적지를 enum으로 정의 (`repositoryDetail(url:)`)
+  - `resultList(query:)`는 제거됨 - 검색 결과가 SearchView에 통합
 - `AppRouter`: `NavigationPath`를 관리하며 push/pop 메서드 제공
 - ViewModel은 Router를 통해 네비게이션 트리거
 
 ### 비즈니스 로직
 
 - **검색**: `SearchRepositoriesUseCase` → `GitHubRepositoryRepository` → `GitHubAPIClient`
+- **검색 결과**: SearchViewModel에서 상태 관리 (`repositories`, `totalCount`, `hasNextPage`)
 - **최근 검색**: `RecentSearchUseCase` → `RecentSearchStore` (UserDefaults)
 
 ### 에러 처리

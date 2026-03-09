@@ -11,12 +11,6 @@ final class AppRouter: ObservableObject {
 
     // MARK: - Navigation Methods
 
-    /// 검색 결과 화면으로 이동
-    /// - Parameter query: 검색어
-    func showResults(for query: String) {
-        path.append(AppRoute.resultList(query: query))
-    }
-
     /// 저장소 상세 WebView로 이동
     /// - Parameter url: 저장소 HTML URL
     func showDetail(url: URL) {

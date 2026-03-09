@@ -26,17 +26,10 @@ struct GitHubSearchApp: App {
     @ViewBuilder
     private func destinationView(for route: AppRoute) -> some View {
         switch route {
-        case .resultList(let query):
-            ResultListView(
-                viewModel: ResultListViewModel(
-                    query: query,
-                    searchUseCase: AppEnvironment.shared.searchUseCase,
-                    router: router
-                )
-            )
-
         case .repositoryDetail(let url):
             RepositoryWebView(url: url)
+        default:
+            EmptyView()
         }
     }
 }

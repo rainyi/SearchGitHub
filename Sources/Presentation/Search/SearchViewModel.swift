@@ -13,13 +13,34 @@ final class SearchViewModel: ObservableObject {
 
     @Published var searchQuery: String = ""
     @Published var recentSearches: [RecentSearchItem] = []
-    @Published var isLoading: Bool = false
+
+    // 검색 결과 상태
+    @Published var repositories: [GitHubRepository] = []
+    @Published var totalCount: Int = 0
+    @Published var isSearching: Bool = false
+    @Published var isLoadingMore: Bool = false
+    @Published var hasSearched: Bool = false
     @Published var error: AppError?
+    @Published var hasNextPage: Bool = false
+
+    private var currentPage: Int = 1
 
     // MARK: - Computed Properties
 
     var isSearchButtonEnabled: Bool {
-        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isLoading
+        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isSearching
+    }
+
+    var shouldShowError: Bool {
+        error != nil && repositories.isEmpty
+    }
+
+    var shouldShowEmptyState: Bool {
+        hasSearched && repositories.isEmpty && error == nil
+    }
+
+    var shouldShowResults: Bool {
+        hasSearched
     }
 
     // MARK: - Initialization
@@ -46,19 +67,51 @@ final class SearchViewModel: ObservableObject {
         let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedQuery.isEmpty else { return }
 
-        isLoading = true
+        isSearching = true
         error = nil
+        hasSearched = true
+        currentPage = 1
 
         do {
             try await recentSearchUseCase.addSearch(query: trimmedQuery)
-            router.showResults(for: trimmedQuery)
+            let result = try await searchUseCase.execute(keyword: trimmedQuery, page: 1)
+            repositories = result.repositories
+            totalCount = result.totalCount
+            hasNextPage = result.hasNextPage
+            await loadRecentSearches()
         } catch let error as AppError {
             self.error = error
+            repositories = []
         } catch {
             self.error = .unknown(error)
+            repositories = []
         }
 
-        isLoading = false
+        isSearching = false
+    }
+
+    func loadNextPage() async {
+        guard !isLoadingMore && hasNextPage else { return }
+
+        let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else { return }
+
+        isLoadingMore = true
+        currentPage += 1
+
+        do {
+            let result = try await searchUseCase.execute(keyword: trimmedQuery, page: currentPage)
+            repositories.append(contentsOf: result.repositories)
+            hasNextPage = result.hasNextPage
+        } catch {
+            currentPage -= 1
+        }
+
+        isLoadingMore = false
+    }
+
+    func refresh() async {
+        await search()
     }
 
     func selectRecentSearch(_ item: RecentSearchItem) {
@@ -84,6 +137,18 @@ final class SearchViewModel: ObservableObject {
         } catch {
             // Silently handle clear error
         }
+    }
+
+    func selectRepository(_ repository: GitHubRepository) {
+        router.showDetail(url: repository.htmlUrl)
+    }
+
+    func clearSearch() {
+        searchQuery = ""
+        repositories = []
+        hasSearched = false
+        error = nil
+        totalCount = 0
     }
 
     // MARK: - Private Methods

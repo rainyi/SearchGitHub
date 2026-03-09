@@ -10,8 +10,17 @@
 - 플랫폼: iOS 17+, Swift 5.9, SwiftUI
 - 아키텍처: Clean Architecture (Presentation / Domain / Data) + MVVM + Router
 - 주요 기능:
-  - 검색 화면: 검색어 입력, 최근 검색어 표시/삭제/저장, (옵션) 자동완성
-  - 결과 화면: 리스트, 페이지네이션, 저장소 WebView 오픈
+  - 검색 화면: 검색어 입력, 최근 검색어 표시/삭제/저장, 검색 결과 표시
+  - 검색 결과: 같은 화면에서 리스트로 표시, 페이지네이션
+  - 상세 화면: 저장소 WebView 오픈
+
+**2026-03-10 UI/UX 개선:**
+- 검색 결과를 별도 화면(ResultListView)이 아닌 SearchView에 통합
+- 네비게이션 구조: SearchView → RepositoryWebView (간소화)
+- 검색바: 텍스트 입력 시 동적으로 줄어들며 취소 버튼 표시
+- 취소 버튼: 빨간색으로 변경
+- 최근 검색어: 시계/화살표 아이콘 제거, X 버튼으로 개별 삭제
+- 페이지네이션: List → ScrollView + LazyVStack 변경
 
 이 파일에 적힌 내용을 항상 우선순위 높게 반영해서 답변해 주세요.
 
@@ -119,11 +128,13 @@ CODE_REVIEW_AND_TESTING.md
 - Router
   - `@MainActor final class AppRouter: ObservableObject`
   - `@Published var path = NavigationPath()`를 가지고,
-    `showResults(for:)`, `showDetail(url:)`, `pop()`, `popToRoot()` 메서드로 경로 변경
+    `showDetail(url:)`, `pop()`, `popToRoot()` 메서드로 경로 변경
+  - showResults(for:)는 검색 결과가 SearchView에 통합되어 제거됨
   - 단순한 구현: NavigationPath 래핑만 담당, 복잡한 Coordinator 로직은 포함하지 않음
 
 - Route
-  - `enum AppRoute: Hashable { case resultList(query: String), repositoryDetail(url: URL) }`
+  - `enum AppRoute: Hashable { case repositoryDetail(url: URL) }`
+  - resultList는 SearchView에 통합되어 별도 Route 없음
   - 연관값을 통해 필요한 정보 전달
 
 - RootView
@@ -314,7 +325,8 @@ final class DefaultGitHubAPIClient: GitHubAPIClient {
 - Router
   - 단순화된 구현: NavigationPath 래핑만 담당
   - `@Published var path = NavigationPath()`
-  - 명시적 메서드: `showResults(for:)`, `showDetail(url:)`, `pop()`
+  - 명시적 메서드: `showDetail(url:)`, `pop()`
+  - showResults(for:)는 제거됨 (검색 결과가 SearchView에 통합)
   - 복잡한 Coordinator 패턴, DI Container는 사용하지 않음
 
 - API Client
