@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__playwright__*",
+      "mcp__chrome-devtools__*",
+      "mcp__serena__*",
+      "mcp__shrimp-task-manager__*",
+      "mcp__sequential-thinking__*",
+      "mcp__context7__*",
+      "mcp__XcodeBuildMCP__*",
+      "mcp__filesystem__*",
+      "mcp__iOSSimulator__*",
+      "Bash(claude mcp:*)",
+      "Bash(npm view:*)",
+      "Bash(npm search:*)",
+      "WebSearch",
+      "Bash(tail:*)",
+      "Bash(ls:*)",
+      "Bash(echo:*)",
+      "WebFetch(domain:forms.greetinghr.com)",
+      "Bash(curl:*)",
+      "WebFetch(domain:getupnote.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}
