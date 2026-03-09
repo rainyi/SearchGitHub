@@ -32,7 +32,8 @@
       "Bash(git status:*)",
       "Bash(swift test:*)",
       "Bash(/Users/rainyi/Documents/Project/Study/SearchGitHub/Package.swift:*)",
-      "Bash(swift build:*)"
+      "Bash(swift build:*)",
+      "Bash(python3:*)"
     ]
   }
 }
