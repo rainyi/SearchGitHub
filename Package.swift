@@ -24,7 +24,13 @@ let package = Package(
         .testTarget(
             name: "GitHubSearchTests",
             dependencies: ["GitHubSearch"],
-            path: "Tests"
+            path: "Tests",
+            exclude: ["UITests"]
+        ),
+        .testTarget(
+            name: "GitHubSearchUITests",
+            dependencies: ["GitHubSearch"],
+            path: "Tests/UITests"
         ),
     ]
 )

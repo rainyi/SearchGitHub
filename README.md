@@ -14,7 +14,7 @@ GitHub 저장소를 검색하고, 최근 검색어를 관리하며, 결과를 We
 | 언어/프레임워크 | Swift 5.9, SwiftUI |
 | 아키텍처 | Clean Architecture (Presentation / Domain / Data) + MVVM + Router |
 | 의존성 관리 | Swift Package Manager |
-| 테스트 | 64개 테스트, 비즈니스 로직 100% 커버리지 |
+| 테스트 | 76개 테스트 (단위 64개 + UI 12개), 비즈니스 로직 100% 커버리지 |
 
 ---
 
@@ -101,6 +101,8 @@ Tests/
     SearchViewModelTests.swift           # 12개 테스트
     AppRouterTests.swift                 # 7개 테스트
     ResultListViewModelTests.swift       # 9개 테스트
+  UITests/
+    SearchFlowUITests.swift              # 12개 UI 테스트
 ```
 
 ### 레이어 의존 방향
@@ -166,8 +168,9 @@ xed .
 | Presentation | SearchViewModelTests | 12 | 검색, 최근 검색어, 네비게이션 |
 | Presentation | AppRouterTests | 7 | push, pop, popToRoot |
 | Presentation | ResultListViewModelTests | 9 | 페이지네이션, 새로고침, 에러 |
+| UI | SearchFlowUITests | 12 | 검색 흐름, 최근 검색어, 네비게이션, Pull-to-Refresh |
 
-**총 64개 테스트 통과**
+**총 76개 테스트 통과 (단위 64개 + UI 12개)**
 
 ### 코드 커버리지
 
