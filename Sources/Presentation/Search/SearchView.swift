@@ -31,6 +31,7 @@ struct SearchView: View {
                 .focused($isSearchFieldFocused)
                 .textFieldStyle(.plain)
                 .submitLabel(.search)
+                .accessibilityIdentifier("searchTextField")
                 .onSubmit {
                     Task {
                         await viewModel.search()
@@ -58,6 +59,7 @@ struct SearchView: View {
                     Text("검색")
                 }
             }
+            .accessibilityIdentifier("searchButton")
             .disabled(!viewModel.isSearchButtonEnabled)
         }
         .padding()

@@ -61,3 +61,11 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 mcp.json
+
+# Tuist
+Derived/
+GitHubSearch.xcodeproj/
+GitHubSearch.xcworkspace/
+
+# Temporary scripts
+auto_search_test.sh
