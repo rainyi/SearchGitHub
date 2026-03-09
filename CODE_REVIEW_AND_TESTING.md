@@ -56,36 +56,64 @@ Reviewer 리뷰 완료 후 실행하는 자동 검증 단계.
 
 ## 3. 테스트 전략 (Tester 역할)
 
-우선순위 높은 테스트 대상:
+### 테스트 타이밍
 
-1. RecentSearchUseCase + RecentSearchStore
-2. GitHubRepositoryRepositoryImpl (필요 시)
-3. SearchViewModel의 핵심 로직(검색, 페이지네이션, 최근 검색어 반영)
+**단위 테스트: 파일/기능 단위 개발 후 바로**
+- 1~2 파일 개발 완료 → 즉시 해당 파일 단위 테스트 작성
+- 커밋 전 필수 테스트 완료
 
-테스트 스타일:
+**통합/커버리지 체크: 각 Phase 끝 또는 전체 마무리**
+- 숫자 집착보다는 "중요 로직이 빠지지 않았는지 확인" 용도
+- 핵심 비즈니스 로직, 에러 케이스 위주로 검증
 
-- XCTest 사용
-- Given-When-Then 네이밍 및 구조 유지
+### 우선순위 높은 테스트 대상
 
-테스트 요청 예시 프롬프트:
+1. **RecentSearchUseCase + RecentSearchStore**
+   - 중복 제거 로직 (대소문자 구분)
+   - 최대 개수 제한
+   - 정렬 (최신순)
+
+2. **GitHubRepositoryRepositoryImpl** (Phase 2에서)
+   - DTO → Entity 매핑
+   - 에러 변환
+
+3. **SearchViewModel** (Phase 3에서)
+   - 검색 실행
+   - 페이지네이션
+   - 에러 상태 처리
+
+### 테스트 스타일
+
+- **XCTest** 사용
+- **Given-When-Then** 네이밍 및 구조 유지
+- **예시:** `testGetRecentSearches_WhenMultipleItemsExist_ThenReturnsSortedByDate()`
+
+### 테스트 요청 예시 프롬프트
 
 > 지금은 Tester 역할이야.
-> RecentSearchUseCase와 UserDefaultsRecentSearchStore에 대해
-> TESTING 섹션 기준으로 필요한 유닛 테스트 케이스를 정의하고,
-> XCTest 코드 예제를 작성해줘.
+> RecentSearchUseCase에 대해 다음 케이스의 단위 테스트를 작성해줘:
+> 1. addSearch 시 중복 검색어 제거
+> 2. addSearch 시 최대 10개 유지
+> 3. getRecentSearches 시 최신순 정렬
 
 ---
 
 ## 4. 완료 기준 체크리스트
 
-각 Phase 완료 전 확인해야 할 항목:
+### 파일/기능 단위 완료 기준 (1~2 파일마다)
 
-- [ ] **Developer** - 1~2 파일 단위 개발 완료
-- [ ] **Reviewer** - Claude.md 기준 코드 리뷰 완료
+- [ ] **Developer** - 파일 개발 완료
+- [ ] **Reviewer** - 코드 리뷰 완료
 - [ ] **/simplify** - 자동 리뷰 및 수정 완료
-- [ ] **Tester** - 핵심 기능 테스트 작성 완료
-- [ ] **AI_ASSIST.md** - 대화 내용 요약 기록 완료
-- [ ] **커밋** - git commit 완료
+- [ ] **Tester** - 단위 테스트 작성 완료 (해당 파일에 대한)
+- [ ] **커밋** - 테스트 포함하여 git commit
+- [ ] **AI_ASSIST.md** - 세션 기록 업데이트
+
+### Phase 완료 기준 (Phase 끝날 때마다)
+
+- [ ] 모든 파일/기능 단위 완료
+- [ ] 커버리지 체크 (중요 로직 위주)
+- [ ] 통합 테스트 (필요 시)
 
 **모든 항목 완료 후 다음 Phase로 진행**
 
