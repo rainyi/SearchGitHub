@@ -404,7 +404,8 @@ private struct MockSearchRepositoriesUseCaseWithResults: SearchRepositoriesUseCa
     }
 }
 
-private actor MockRecentSearchUseCasePreview: RecentSearchUseCase {
+@MainActor
+private final class MockRecentSearchUseCasePreview: RecentSearchUseCase {
     func getRecentSearches() async throws -> [RecentSearchItem] {
         return [
             RecentSearchItem(query: "swift", searchedAt: Date()),

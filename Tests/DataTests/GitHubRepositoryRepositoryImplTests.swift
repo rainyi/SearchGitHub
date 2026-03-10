@@ -3,11 +3,12 @@ import XCTest
 
 // MARK: - Mock
 
-actor MockGitHubAPIClient: GitHubAPIClient {
-    nonisolated(unsafe) var mockResult: (repositories: [GitHubRepository], totalCount: Int)?
-    nonisolated(unsafe) var mockError: Error?
-    nonisolated(unsafe) var capturedQuery: String?
-    nonisolated(unsafe) var capturedPage: Int?
+@MainActor
+final class MockGitHubAPIClient: GitHubAPIClient {
+    var mockResult: (repositories: [GitHubRepository], totalCount: Int)?
+    var mockError: Error?
+    var capturedQuery: String?
+    var capturedPage: Int?
 
     func searchRepositories(query: String, page: Int) async throws -> (repositories: [GitHubRepository], totalCount: Int) {
         capturedQuery = query

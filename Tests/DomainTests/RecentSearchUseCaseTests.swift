@@ -2,6 +2,7 @@ import XCTest
 @testable import GitHubSearch
 
 /// RecentSearchUseCase 단위 테스트
+@MainActor
 final class RecentSearchUseCaseTests: XCTestCase {
 
     private var sut: DefaultRecentSearchUseCase!

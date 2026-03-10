@@ -8,6 +8,7 @@ struct SearchResult {
 }
 
 /// GitHub 저장소 검색 Repository 인터페이스
+@MainActor
 protocol GitHubRepositoryRepository {
     /// 저장소 검색
     /// - Parameters:

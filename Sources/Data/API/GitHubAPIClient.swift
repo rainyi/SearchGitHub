@@ -2,6 +2,7 @@ import Foundation
 
 // MARK: - API Client Protocol
 
+@MainActor
 protocol GitHubAPIClient: Sendable {
     /// GitHub 저장소 검색
     /// - Parameters:
@@ -15,7 +16,8 @@ protocol GitHubAPIClient: Sendable {
 // MARK: - Implementation
 
 /// GitHub API 클라이언트 기본 구현
-actor DefaultGitHubAPIClient: GitHubAPIClient {
+@MainActor
+final class DefaultGitHubAPIClient: GitHubAPIClient {
 
     // MARK: - Properties
 

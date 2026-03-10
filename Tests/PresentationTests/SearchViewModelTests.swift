@@ -3,10 +3,11 @@ import XCTest
 
 // MARK: - Mocks
 
-private actor MockSearchUseCase: SearchRepositoriesUseCase {
-    nonisolated(unsafe) var capturedKeywords: [String] = []
-    nonisolated(unsafe) var capturedPages: [Int] = []
-    nonisolated(unsafe) var stubResult: SearchResult = SearchResult(repositories: [], totalCount: 0, hasNextPage: false)
+@MainActor
+private final class MockSearchUseCase: SearchRepositoriesUseCase {
+    var capturedKeywords: [String] = []
+    var capturedPages: [Int] = []
+    var stubResult: SearchResult = SearchResult(repositories: [], totalCount: 0, hasNextPage: false)
 
     func execute(keyword: String, page: Int) async throws -> SearchResult {
         capturedKeywords.append(keyword)
@@ -14,17 +15,18 @@ private actor MockSearchUseCase: SearchRepositoriesUseCase {
         return stubResult
     }
 
-    nonisolated func getCallCount() -> Int {
+    func getCallCount() -> Int {
         capturedKeywords.count
     }
 }
 
-private actor MockRecentSearchUseCase: RecentSearchUseCase {
-    nonisolated(unsafe) var mockItems: [RecentSearchItem] = []
-    nonisolated(unsafe) var mockError: Error?
-    nonisolated(unsafe) var capturedAddQuery: String?
-    nonisolated(unsafe) var capturedDeleteId: UUID?
-    nonisolated(unsafe) var clearAllCalled = false
+@MainActor
+private final class MockRecentSearchUseCase: RecentSearchUseCase {
+    var mockItems: [RecentSearchItem] = []
+    var mockError: Error?
+    var capturedAddQuery: String?
+    var capturedDeleteId: UUID?
+    var clearAllCalled = false
 
     func getRecentSearches() async throws -> [RecentSearchItem] {
         if let error = mockError { throw error }
@@ -50,7 +52,7 @@ private actor MockRecentSearchUseCase: RecentSearchUseCase {
         mockItems.removeAll()
     }
 
-    nonisolated func setMockItems(_ items: [RecentSearchItem]) {
+    func setMockItems(_ items: [RecentSearchItem]) {
         mockItems = items
     }
 }

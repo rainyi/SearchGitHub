@@ -83,7 +83,7 @@ final class ResultListViewModel: ObservableObject {
             repositories.append(contentsOf: result.repositories)
             hasNextPage = result.hasNextPage
             currentPage = nextPage
-        } catch let error as AppError {
+        } catch is AppError {
             // Append 에러는 무시하고 hasNextPage만 false로 설정
             hasNextPage = false
         } catch {

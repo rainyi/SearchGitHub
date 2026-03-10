@@ -41,7 +41,19 @@
       "Bash(xcodebuild:*)",
       "Bash(xcrun xcresulttool:*)",
       "Bash(git push:*)",
-      "Bash(xcrun simctl:*)"
+      "Bash(xcrun simctl:*)",
+      "Bash(git rebase:*)",
+      "Bash(git:*)",
+      "Bash(tuist build:*)",
+      "Bash(tuist test:*)",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "mcp__plugin_context-mode_context-mode__ctx_search",
+      "Bash(mv:*)",
+      "Bash(echo === 최종 프로젝트 구조 ===:*)",
+      "Bash(xcodegen generate:*)",
+      "mcp__plugin_context-mode_context-mode__ctx_execute",
+      "Bash(/Users/rainyi/Documents/Project/Study/SearchGitHub/GitHubSearch.xcworkspace/contents.xcworkspacedata:*)"
     ]
   }
 }

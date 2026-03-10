@@ -2,6 +2,7 @@ import Foundation
 @testable import GitHubSearch
 
 /// 테스트용 InMemory RecentSearchStore
+@MainActor
 final class MockRecentSearchStore: RecentSearchStore {
     private var items: [RecentSearchItem] = []
     var shouldThrowError: Error?

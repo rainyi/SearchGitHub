@@ -14,7 +14,8 @@ GitHub 저장소를 검색하고, 최근 검색어를 관리하며, 결과를 We
 | 언어/프레임워크 | Swift 5.9, SwiftUI |
 | 아키텍처 | Clean Architecture (Presentation / Domain / Data) + MVVM + Router |
 | 의존성 관리 | Swift Package Manager |
-| 테스트 | 76개 테스트 (단위 64개 + UI 12개), 비즈니스 로직 100% 커버리지 |
+| 테스트 | 85개 테스트 (단위 71개 + UI 12개), 비즈니스 로직 100% 커버리지 |
+| 개발 환경 | Xcode 16.0+, macOS 14+ |
 
 ---
 
@@ -29,6 +30,7 @@ GitHub 저장소를 검색하고, 최근 검색어를 관리하며, 결과를 We
 - 최근 검색어 개별 삭제 (X 버튼) / 전체 삭제
 - 앱 재시작 후에도 최근 검색어 유지 (UserDefaults)
 - 최근 검색어 탭 시 해당 검색어로 재검색
+- 자동완성 기능 (최근 검색어 기반)
 
 ### ✅ 검색 결과 (SearchView에 통합)
 - 같은 화면에서 검색 결과 리스트 표시
@@ -47,116 +49,138 @@ GitHub 저장소를 검색하고, 최근 검색어를 관리하며, 결과를 We
 ## 3. 프로젝트 구조
 
 ```
-Sources/
-  App/
-    GitHubSearchApp.swift          # 앱 엔트리 포인트 (@main)
-    AppEnvironment.swift           # DI 컨테이너 (Singleton)
-
-  Presentation/
-    Router/
-      AppRoute.swift               # 화면 전환 목적지 정의 (enum) - repositoryDetail만 사용
-      AppRouter.swift              # NavigationPath 관리
-    Search/
-      SearchView.swift             # 검색 화면 UI (검색 + 결과 통합)
-      SearchViewModel.swift        # 검색/최근 검색/검색 결과 상태 관리
-    ResultList/                    # (Legacy) 별도 결과 화면 - 현재 미사용
-      ResultListView.swift
-      ResultListViewModel.swift
-    RepositoryDetail/
-      RepositoryWebView.swift      # WKWebView 기반 상세 화면
-    Components/
-      RepositoryListCell.swift     # 저장소 리스트 셀
-      LoadingView.swift            # 로딩 상태 공통 컴포넌트
-      ErrorView.swift              # 에러 상태 공통 컴포넌트
-      EmptyView.swift              # 빈 상태 공통 컴포넌트
-
-  Domain/
-    Entities/
-      GitHubRepository.swift       # 저장소 도메인 모델
-      RecentSearchItem.swift       # 최근 검색어 도메인 모델
-      RepositoryOwner.swift        # 저장소 소유자 모델
-      SearchResult.swift           # 검색 결과 모델
-    UseCases/
-      SearchRepositoriesUseCase.swift    # 저장소 검색 유즈케이스
-      RecentSearchUseCase.swift          # 최근 검색어 관리 유즈케이스
-    Errors/
-      AppError.swift               # 공통 에러 타입 (Network, Decoding, RateLimit 등)
-    Repositories/
-      GitHubRepositoryRepository.swift   # Repository 인터페이스
-
-  Data/
-    API/
-      GitHubAPIClient.swift        # GitHub API 호출 (async/await)
-      GitHubDTOs.swift             # API 응답 DTO 및 매핑 로직
-    Repositories/
-      GitHubRepositoryRepositoryImpl.swift  # Repository 구현체
-    Storage/
-      RecentSearchStore.swift            # Store 프로토콜
-      UserDefaultsRecentSearchStore.swift # UserDefaults 구현체
-      InMemoryRecentSearchStore.swift     # 메모리 구현체 (테스트용)
-
-Tests/
-  DomainTests/
-    RecentSearchUseCaseTests.swift       # 12개 테스트
-    SearchRepositoriesUseCaseTests.swift # 11개 테스트
-  DataTests/
-    GitHubAPIClientTests.swift           # 15개 테스트
-    GitHubDTOsTests.swift                # 9개 테스트
-    GitHubRepositoryRepositoryImplTests.swift # 6개 테스트
-    UserDefaultsRecentSearchStoreTests.swift  # 8개 테스트
-  PresentationTests/
-    SearchViewModelTests.swift           # 12개 테스트
-    AppRouterTests.swift                 # 7개 테스트
-    ResultListViewModelTests.swift       # 9개 테스트
-  UITests/
-    SearchFlowUITests.swift              # 12개 UI 테스트
+GitHubSearch-iOS/
+├── Package.swift                       # SPM 패키지 정의
+├── Sources/                            # GitHubSearch 라이브러리
+│   ├── Domain/                         # 비즈니스 로직, 엔티티, 유즈케이스
+│   │   ├── Entities/
+│   │   ├── UseCases/
+│   │   ├── Repositories/
+│   │   └── Errors/
+│   ├── Data/                           # 네트워크, 저장소 구현
+│   │   ├── API/
+│   │   ├── Repositories/
+│   │   └── Storage/
+│   └── Presentation/                   # UI 로직, ViewModel, Router
+│       ├── Router/
+│       ├── Search/
+│       ├── Components/
+│       └── AppEnvironment.swift
+├── Tests/                              # 85개 테스트
+└── README.md                           # 실행 방법 문서
 ```
 
 ### 레이어 의존 방향
 ```
-Presentation (View → ViewModel)
-       ↓
-Domain (UseCase → Repository Interface)
-       ↓
-Data (Repository Implementation → API/Storage)
+┌─────────────────────────────────────────┐
+│  Presentation Layer (SwiftUI)           │
+│  - SearchView, ViewModel                │
+│  - AppRouter (Navigation)               │
+├─────────────────────────────────────────┤
+│  Domain Layer                           │
+│  - UseCases (비즈니스 로직)              │
+│  - Entities (GitHubRepository 등)       │
+│  - Repository Interfaces                │
+├─────────────────────────────────────────┤
+│  Data Layer                             │
+│  - Repository Implementations           │
+│  - APIClient (GitHub API)               │
+│  - Storage (UserDefaults)               │
+└─────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. 빌드 및 실행 방법
+## 4. 실행 방법
 
-### Swift Package Manager (권장)
+### 요구사항
+- **Xcode**: 16.0 이상
+- **iOS**: 17.0 이상
+- **macOS**: 14.0 (Sonoma) 이상
+
+### 방법 1: Xcode에서 Package.swift 열기 (권장)
 
 ```bash
-# 1. 리포지토리 클론
+# 저장소 클론
 git clone https://github.com/your-id/GitHubSearch-iOS.git
 cd GitHubSearch-iOS
 
-# 2. 빌드
-swift build
-
-# 3. 테스트
-swift test
-
-# 4. 커버리지 포함 테스트
-swift test --enable-code-coverage
-```
-
-### Xcode
-
-```bash
-# Xcode 프로젝트 생성 (Package.swift 기반)
+# Xcode에서 Package.swift 열기
 open Package.swift
 ```
 
-또는
+Xcode가 자동으로 SPM 프로젝트를 로드합니다. 그 후:
+
+1. **Xcode가 Package.swift를 로드하면 자동으로 Swift 패키지가 인식됨**
+
+2. **iOS 앱 타겟 추가**:
+   - `File > New > Target...`
+   - `iOS` → `App` 선택
+   - Product Name: `GitHubSearchApp`
+   - Team: None (또는 자신의 팀)
+   - Organization Identifier: `com.kurly`
+   - Interface: `SwiftUI` (또는 Storyboard)
+   - Language: `Swift`
+
+3. **SPM 패키지 의존성 추가**:
+   - 프로젝트 네비게이터에서 `GitHubSearchApp` 타겟 선택
+   - `Build Phases` → `Link Binary With Libraries`
+   - `+` 버튼 클릭 → `GitHubSearch` 선택
+
+4. **앱 소스 코드 작성**:
+
+   `GitHubSearchApp.swift` (또는 `AppDelegate.swift` / `SceneDelegate.swift`):
+   ```swift
+   import SwiftUI
+   import GitHubSearch
+
+   @main
+   struct GitHubSearchApp: App {
+       @StateObject private var router = AppRouter()
+
+       var body: some Scene {
+           WindowGroup {
+               NavigationStack(path: $router.path) {
+                   SearchView(
+                       viewModel: SearchViewModel(
+                           searchUseCase: AppEnvironment.shared.searchUseCase,
+                           recentSearchUseCase: AppEnvironment.shared.recentSearchUseCase,
+                           router: router
+                       )
+                   )
+                   .navigationDestination(for: AppRoute.self) { route in
+                       switch route {
+                       case .repositoryDetail(let url):
+                           RepositoryWebView(url: url)
+                       default:
+                           EmptyView()
+                       }
+                   }
+               }
+               .environmentObject(router)
+           }
+       }
+   }
+   ```
+
+5. **빌드 및 실행**:
+   - iPhone 16 시뮬레이터 선택 (iOS 17.0+)
+   - `Cmd + R` 로 앱 빌드 및 실행
+
+### 방법 2: Swift Package Manager만으로 테스트 실행
 
 ```bash
-# Xcode에서 직접 열기
-xed .
-```
+# 전체 테스트 실행 (단위 테스트만, iOS 시뮬레이터 불필요)
+swift test
 
-**참고**: iOS 앱을 실제로 빌드하려면 `Sources/App/GitHubSearchApp.swift`에서 `@main` 주석을 해제해야 합니다. (SPM 테스트와의 충돌 방지를 위해 현재는 주석 처리됨)
+# 특정 테스트 실행
+swift test --filter DomainTests
+swift test --filter DataTests
+swift test --filter PresentationTests
+
+# 커버리지 리포트
+swift test --enable-code-coverage
+```
 
 ---
 
@@ -172,56 +196,22 @@ xed .
 | Data | GitHubDTOsTests | 9 | DTO 매핑, Date 파싱 |
 | Data | GitHubRepositoryRepositoryImplTests | 6 | Repository 패턴, hasNextPage 계산 |
 | Data | UserDefaultsRecentSearchStoreTests | 8 | 저장/로드/삭제, UserDefaults |
-| Presentation | SearchViewModelTests | 12 | 검색, 최근 검색어, 네비게이션 |
-| Presentation | AppRouterTests | 7 | push, pop, popToRoot |
+| Presentation | SearchViewModelTests | 16 | 검색, 최근 검색어, 자동완성, 네비게이션 |
+| Presentation | AppRouterTests | 6 | push, pop, popToRoot |
 | Presentation | ResultListViewModelTests | 9 | 페이지네이션, 새로고침, 에러 |
-| UI | SearchFlowUITests | 12 | 검색 흐름, 최근 검색어, 네비게이션, Pull-to-Refresh |
+| UI | SearchFlowUITests | 12 | 검색 흐름, 최근 검색어, 네비게이션 |
 
-**총 76개 테스트 통과 (단위 64개 + UI 12개)**
-
-### 코드 커버리지
-
-| 레이어 | 주요 컴포넌트 | 커버리지 |
-|--------|-------------|----------|
-| Domain | UseCases | **100%** |
-| Data | Repository | **100%** |
-| Data | Store | **88%** |
-| Presentation | ViewModels | **80-90%** |
-| Presentation | Router | **100%** |
+**총 85개 테스트** (단위 71개 + UI 12개)
 
 ### 테스트 실행
 
 ```bash
-# 전체 테스트
+# SPM 테스트
 swift test
 
-# 특정 테스트 타겟
-swift test --filter DomainTests
-swift test --filter DataTests
-swift test --filter PresentationTests
-
-# 커버리지 리포트 생성
-swift test --enable-code-coverage
+# Xcode에서 테스트
+# Package.swift를 Xcode에서 연 후 Cmd + U
 ```
-
-### UI 테스트 실행 (Xcode 필요)
-
-**참고**: UI 테스트는 실제 iOS 앱이 필요하므로 Xcode에서 실행해야 합니다.
-
-```bash
-# 1. Package.swift를 Xcode에서 열기
-open Package.swift
-
-# 2. 테스트할 시뮬레이터 선택 (iPhone 16 권장)
-
-# 3. Product > Test (⌘+U) 로 테스트 실행
-#    또는 Test Navigator에서 개별 UI 테스트 실행
-```
-
-**UI 테스트 주의사항**:
-- UI 테스트는 GitHub API에 실제로 네트워크 요청을 볩니다
-- Rate Limit에 주의하세요 (시간당 60회 제한)
-- 테스트 전 시뮬레이터를 리셋하면 최근 검색어가 초기화됩니다
 
 ---
 
@@ -251,7 +241,6 @@ open Package.swift
 ### 네비게이션 (Router 패턴)
 
 - `AppRoute`: 화면 목적지를 enum으로 정의 (`repositoryDetail(url:)`)
-  - `resultList(query:)`는 제거됨 - 검색 결과가 SearchView에 통합
 - `AppRouter`: `NavigationPath`를 관리하며 push/pop 메서드 제공
 - ViewModel은 Router를 통해 네비게이션 트리거
 
@@ -307,7 +296,6 @@ GET https://api.github.com/search/repositories?q={keyword}&page={page}&per_page=
 - [ ] 즐겨찾기(Starred) 저장소 관리
 - [ ] 다국어(Localization) 지원
 - [ ] 다크모드 지원
-- [ ] SwiftUI UI 테스트 추가
 
 ---
 

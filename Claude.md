@@ -132,11 +132,11 @@ Tests/
 
 README.md
 Claude.md
-Planning.md
-AI_ASSIST.md
-ARCHITECT.md
-DEV_TASKS.md
-CODE_REVIEW_AND_TESTING.md
+docs/Planning.md
+docs/AI_ASSIST.md
+docs/ARCHITECT.md
+docs/DEV_TASKS.md
+docs/CODE_REVIEW_AND_TESTING.md
 
 코드를 제안할 때는 반드시 위 구조 중 어디에 들어갈 파일인지 먼저 명시하고, 그 위치에 맞는 스타일로 작성해 주세요.
 
@@ -320,7 +320,7 @@ final class DefaultGitHubAPIClient: GitHubAPIClient {
 
 내가 "지금은 Reviewer 역할이야"라고 말하면:
 
-- CODE_REVIEW_AND_TESTING.md 기준으로 문제점을 지적한다.
+- docs/CODE_REVIEW_AND_TESTING.md 기준으로 문제점을 지적한다.
 - 구조, 에러 처리, 네이밍, 테스트, 유지보수 관점에서 코멘트를 단다.
 - 필요하면 작은 리팩터링 패치(함수 단위, 파일 단위)를 제안하되,
   전체 구조를 갈아엎기보다는 "점진적 개선"에 초점을 둔다.
@@ -339,12 +339,12 @@ final class DefaultGitHubAPIClient: GitHubAPIClient {
 프로젝트 루트에는 다음 문서들이 있다.
 
 - Claude.md: 공통 규칙과 아키텍처/역할 원칙.
-- Planning.md: 요구사항 정리, 작업 Phase/TODO 리스트.
-- ARCHITECT.md: 아키텍처 설계용 상세 메모.
-- DEV_TASKS.md: 구현 단계별 작업 목록.
-- CODE_REVIEW_AND_TESTING.md: 코드 리뷰 기준과 테스트 전략.
-- UI_SPEC.md: 과제에서 요구하는 UI/UX 스펙.
-- AI_ASSIST.md: AI Assist 사용 로그.
+- docs/Planning.md: 요구사항 정리, 작업 Phase/TODO 리스트.
+- docs/ARCHITECT.md: 아키텍처 설계용 상세 메모.
+- docs/DEV_TASKS.md: 구현 단계별 작업 목록.
+- docs/CODE_REVIEW_AND_TESTING.md: 코드 리뷰 기준과 테스트 전략.
+- docs/UI_SPEC.md: 과제에서 요구하는 UI/UX 스펙.
+- docs/AI_ASSIST.md: AI Assist 사용 로그.
 
 내가 대화에서 이들 문서 내용을 붙여 넣으면,
 해당 문서의 규칙과 컨텍스트를 최우선으로 따라야 한다.

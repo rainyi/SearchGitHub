@@ -2,6 +2,7 @@ import Foundation
 @testable import GitHubSearch
 
 /// 테스트용 Mock GitHubRepositoryRepository
+@MainActor
 final class MockGitHubRepositoryRepository: GitHubRepositoryRepository {
     var stubResult: SearchResult?
     var stubError: Error?

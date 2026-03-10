@@ -1,6 +1,7 @@
 import Foundation
 
 /// 최근 검색어 UseCase 프로토콜
+@MainActor
 protocol RecentSearchUseCase {
     /// 최근 검색어 목록 조회
     func getRecentSearches() async throws -> [RecentSearchItem]
@@ -18,6 +19,7 @@ protocol RecentSearchUseCase {
 
 // MARK: - Default Implementation
 
+@MainActor
 final class DefaultRecentSearchUseCase: RecentSearchUseCase {
     private let store: RecentSearchStore
     private let maxCount: Int

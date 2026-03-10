@@ -1,6 +1,7 @@
 import Foundation
 
 /// 저장소 검색 UseCase 프로토콜
+@MainActor
 protocol SearchRepositoriesUseCase {
     /// 저장소 검색 실행
     /// - Parameters:
@@ -12,6 +13,7 @@ protocol SearchRepositoriesUseCase {
 
 // MARK: - Default Implementation
 
+@MainActor
 final class DefaultSearchRepositoriesUseCase: SearchRepositoriesUseCase {
     private let repository: GitHubRepositoryRepository
 

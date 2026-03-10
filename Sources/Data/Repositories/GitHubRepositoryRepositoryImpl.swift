@@ -1,6 +1,7 @@
 import Foundation
 
 /// GitHub 저장소 검색 Repository 구현체
+@MainActor
 final class GitHubRepositoryRepositoryImpl: GitHubRepositoryRepository {
 
     // MARK: - Properties
