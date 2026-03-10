@@ -451,7 +451,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				ORGANIZATIONNAME = com.curly;
+				ORGANIZATIONNAME = Kurly;
 				TargetAttributes = {
 					8187EC1FBE76E97E1CE15AD6 = {
 						TestTargetID = 46F498EBF6F05EDB63C7086D;
@@ -588,7 +588,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.curly.GitHubSearchUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kurly.GitHubSearchUITests;
 				PRODUCT_NAME = GitHubSearchUITests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -613,7 +613,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.curly.GitHubSearchUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kurly.GitHubSearchUITests;
 				PRODUCT_NAME = GitHubSearchUITests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -693,7 +693,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.curly.GitHubSearchTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kurly.GitHubSearchTests;
 				PRODUCT_NAME = GitHubSearchTests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -720,7 +720,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.curly.GitHubSearchTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kurly.GitHubSearchTests;
 				PRODUCT_NAME = GitHubSearchTests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -748,7 +748,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.curly.GitHubSearch;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kurly.GitHubSearch;
 				PRODUCT_NAME = GitHubSearchApp;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -833,7 +833,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.curly.GitHubSearch;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kurly.GitHubSearch;
 				PRODUCT_NAME = GitHubSearchApp;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
