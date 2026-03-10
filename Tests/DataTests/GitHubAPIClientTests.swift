@@ -1,22 +1,30 @@
 import XCTest
-@testable import GitHubSearchApp
+@testable import GitHubSearch
 
-/// GitHubAPIClient 단위 테스트 (Temporarily disabled due to Swift Concurrency compatibility issues with MockURLSession)
-/*
+/// GitHubAPIClient 단위 테스트
+@MainActor
 final class GitHubAPIClientTests: XCTestCase {
 
     private var sut: DefaultGitHubAPIClient!
-    private var mockSession: MockURLSession!
+    private var mockURLProtocol: MockURLProtocol.Type = MockURLProtocol.self
 
     override func setUp() {
         super.setUp()
-        mockSession = MockURLSession()
-        sut = DefaultGitHubAPIClient(session: mockSession)
+
+        // URLProtocol mocking 설정
+        mockURLProtocol = MockURLProtocol.self
+        mockURLProtocol.requestHandler = nil
+
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [mockURLProtocol.self]
+        let session = URLSession(configuration: config)
+
+        sut = DefaultGitHubAPIClient(session: session)
     }
 
     override func tearDown() {
         sut = nil
-        mockSession = nil
+        mockURLProtocol.requestHandler = nil
         super.tearDown()
     }
 
@@ -48,7 +56,15 @@ final class GitHubAPIClientTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        mockSession.mockResponse = (data: jsonData, statusCode: 200)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, jsonData)
+        }
 
         // When
         let result = try await sut.searchRepositories(query: "swift", page: 1)
@@ -101,7 +117,15 @@ final class GitHubAPIClientTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        mockSession.mockResponse = (data: jsonData, statusCode: 200)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, jsonData)
+        }
 
         // When
         let result = try await sut.searchRepositories(query: "language", page: 1)
@@ -117,7 +141,15 @@ final class GitHubAPIClientTests: XCTestCase {
 
     func testSearchRepositories_When401Unauthorized_ThenThrowsUnauthorizedError() async {
         // Given
-        mockSession.mockResponse = (data: Data(), statusCode: 401)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 401,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, Data())
+        }
 
         // When/Then
         do {
@@ -132,7 +164,15 @@ final class GitHubAPIClientTests: XCTestCase {
 
     func testSearchRepositories_When403Forbidden_ThenThrowsForbiddenError() async {
         // Given
-        mockSession.mockResponse = (data: Data(), statusCode: 403)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 403,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, Data())
+        }
 
         // When/Then
         do {
@@ -148,8 +188,16 @@ final class GitHubAPIClientTests: XCTestCase {
     func testSearchRepositories_When403WithRateLimitHeader_ThenThrowsRateLimitError() async {
         // Given
         let resetTimestamp = Int(Date().addingTimeInterval(60).timeIntervalSince1970)
-        mockSession.mockResponse = (data: Data(), statusCode: 403)
-        mockSession.mockHeaders = ["X-RateLimit-Reset": String(resetTimestamp)]
+
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 403,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["X-RateLimit-Reset": String(resetTimestamp)]
+            )!
+            return (response, Data())
+        }
 
         // When/Then
         do {
@@ -168,7 +216,15 @@ final class GitHubAPIClientTests: XCTestCase {
 
     func testSearchRepositories_When429TooManyRequests_ThenThrowsRateLimitError() async {
         // Given
-        mockSession.mockResponse = (data: Data(), statusCode: 429)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 429,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, Data())
+        }
 
         // When/Then
         do {
@@ -188,8 +244,16 @@ final class GitHubAPIClientTests: XCTestCase {
     func testSearchRepositories_When429WithResetHeader_ThenThrowsRateLimitWithCorrectDate() async {
         // Given
         let resetTimestamp = Int(Date().addingTimeInterval(120).timeIntervalSince1970)
-        mockSession.mockResponse = (data: Data(), statusCode: 429)
-        mockSession.mockHeaders = ["X-RateLimit-Reset": String(resetTimestamp)]
+
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 429,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["X-RateLimit-Reset": String(resetTimestamp)]
+            )!
+            return (response, Data())
+        }
 
         // When/Then
         do {
@@ -209,7 +273,15 @@ final class GitHubAPIClientTests: XCTestCase {
 
     func testSearchRepositories_When500ServerError_ThenThrowsServerError() async {
         // Given
-        mockSession.mockResponse = (data: Data(), statusCode: 500)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 500,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, Data())
+        }
 
         // When/Then
         do {
@@ -228,7 +300,15 @@ final class GitHubAPIClientTests: XCTestCase {
 
     func testSearchRepositories_When503ServiceUnavailable_ThenThrowsServerError() async {
         // Given
-        mockSession.mockResponse = (data: Data(), statusCode: 503)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 503,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, Data())
+        }
 
         // When/Then
         do {
@@ -250,7 +330,10 @@ final class GitHubAPIClientTests: XCTestCase {
     func testSearchRepositories_WhenNetworkError_ThenThrowsNetworkError() async {
         // Given
         let networkError = NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet)
-        mockSession.mockError = networkError
+
+        mockURLProtocol.requestHandler = { request in
+            throw networkError
+        }
 
         // When/Then
         do {
@@ -270,7 +353,10 @@ final class GitHubAPIClientTests: XCTestCase {
     func testSearchRepositories_WhenTimeoutError_ThenThrowsNetworkError() async {
         // Given
         let timeoutError = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut)
-        mockSession.mockError = timeoutError
+
+        mockURLProtocol.requestHandler = { request in
+            throw timeoutError
+        }
 
         // When/Then
         do {
@@ -292,7 +378,16 @@ final class GitHubAPIClientTests: XCTestCase {
     func testSearchRepositories_WhenInvalidJSON_ThenThrowsDecodingError() async {
         // Given
         let invalidJSON = "not valid json".data(using: .utf8)!
-        mockSession.mockResponse = (data: invalidJSON, statusCode: 200)
+
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, invalidJSON)
+        }
 
         // When/Then
         do {
@@ -350,7 +445,15 @@ final class GitHubAPIClientTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        mockSession.mockResponse = (data: jsonData, statusCode: 200)
+        mockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, jsonData)
+        }
 
         // When
         let result = try await sut.searchRepositories(query: "test", page: 1)
@@ -373,13 +476,23 @@ final class GitHubAPIClientTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        mockSession.mockResponse = (data: jsonData, statusCode: 200)
+        var capturedRequest: URLRequest?
+        mockURLProtocol.requestHandler = { request in
+            capturedRequest = request
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, jsonData)
+        }
 
         // When
         _ = try await sut.searchRepositories(query: "swift", page: 3)
 
         // Then
-        XCTAssertEqual(mockSession.capturedRequest?.url?.query, "q=swift&page=3&per_page=30")
+        XCTAssertEqual(capturedRequest?.url?.query, "q=swift&page=3&per_page=30")
     }
 
     func testSearchRepositories_WhenQueryHasSpecialCharacters_ThenProperlyEncoded() async throws {
@@ -392,46 +505,54 @@ final class GitHubAPIClientTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        mockSession.mockResponse = (data: jsonData, statusCode: 200)
+        var capturedRequest: URLRequest?
+        mockURLProtocol.requestHandler = { request in
+            capturedRequest = request
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: nil
+            )!
+            return (response, jsonData)
+        }
 
         // When
         _ = try await sut.searchRepositories(query: "swift language", page: 1)
 
         // Then
-        let query = mockSession.capturedRequest?.url?.query
+        let query = capturedRequest?.url?.query
         XCTAssertTrue(query?.contains("q=swift%20language") ?? false)
     }
 }
-*/
 
-// MARK: - Mock URLSession (Temporarily disabled due to Swift Concurrency compatibility)
-/*
-private final class MockURLSession: URLSession {
+// MARK: - Mock URLProtocol
 
-    var mockResponse: (data: Data, statusCode: Int)?
-    var mockError: Error?
-    var mockHeaders: [String: String]?
-    var capturedRequest: URLRequest?
+private final class MockURLProtocol: URLProtocol {
+    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
 
-    override func data(for request: URLRequest) async throws -> (Data, URLResponse) {
-        capturedRequest = request
-
-        if let error = mockError {
-            throw error
-        }
-
-        guard let response = mockResponse else {
-            throw NSError(domain: "MockError", code: -1)
-        }
-
-        let httpResponse = HTTPURLResponse(
-            url: request.url!,
-            statusCode: response.statusCode,
-            httpVersion: "HTTP/1.1",
-            headerFields: mockHeaders
-        )!
-
-        return (response.data, httpResponse)
+    override class func canInit(with request: URLRequest) -> Bool {
+        return true
     }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+
+    override func startLoading() {
+        guard let handler = MockURLProtocol.requestHandler else {
+            fatalError("No request handler set")
+        }
+
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
 }
-*/

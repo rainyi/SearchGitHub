@@ -1,5 +1,5 @@
 import XCTest
-@testable import GitHubSearchApp
+@testable import GitHubSearch
 
 /// AppError 단위 테스트
 final class AppErrorTests: XCTestCase {

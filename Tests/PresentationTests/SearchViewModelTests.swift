@@ -1,5 +1,5 @@
 import XCTest
-@testable import GitHubSearchApp
+@testable import GitHubSearch
 
 // MARK: - Mocks
 

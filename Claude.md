@@ -1,6 +1,6 @@
 # Claude Guide – GitHubSearch iOS Project
 
-이 문서는 GitHub 저장소 검색 iOS 과제에서 Claude(및 다른 AI Assist)가 어떻게 동작해야 하는지 정의하는 가이드입니다.
+이 문서는 GitHub 저장소 검색 iOS 프로젝트에서 Claude(및 다른 AI Assist)가 어떻게 동작해야 하는지 정의하는 가이드입니다.
 
 ---
 
@@ -54,7 +54,7 @@
 
 ## 1. 프로젝트 개요
 
-- 목적: GitHub 저장소 검색 iOS 앱 (컬리 사전 과제)
+- 목적: GitHub 저장소 검색 iOS 앱
 - 플랫폼: iOS 17+, Swift 5.9, SwiftUI
 - 아키텍처: Clean Architecture (Presentation / Domain / Data) + MVVM + Router
 - 주요 기능:
