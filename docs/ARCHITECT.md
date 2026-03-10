@@ -406,6 +406,5 @@ final class MockURLProtocol: URLProtocol { ... }
 - `Tests/DataTests/GitHubDTOsTests.swift`
 - `Tests/DataTests/GitHubRepositoryRepositoryImplTests.swift`
 - `Tests/PresentationTests/SearchViewModelTests.swift`
-- `Tests/PresentationTests/ResultListViewModelTests.swift`
 - `Tests/PresentationTests/AppRouterTests.swift`
 - `Tests/UITests/SearchFlowUITests.swift`

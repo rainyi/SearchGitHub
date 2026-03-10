@@ -17,14 +17,6 @@ struct GitHubSearchApp: App {
                 )
                 .navigationDestination(for: AppRoute.self) { route in
                     switch route {
-                    case .resultList(let query):
-                        ResultListView(
-                            viewModel: ResultListViewModel(
-                                query: query,
-                                searchUseCase: environment.searchUseCase,
-                                router: router
-                            )
-                        )
                     case .repositoryDetail(let url):
                         RepositoryWebView(url: url)
                     }

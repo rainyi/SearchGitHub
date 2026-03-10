@@ -14,7 +14,7 @@ GitHub 저장소를 검색하고, 최근 검색어를 관리하며, 결과를 We
 | 언어/프레임워크 | Swift 5.9, SwiftUI |
 | 아키텍처 | Clean Architecture (Presentation / Domain / Data) + MVVM + Router |
 | 의존성 관리 | Swift Package Manager |
-| 테스트 | 85개 테스트 (단위 71개 + UI 12개), 비즈니스 로직 100% 커버리지 |
+| 테스트 | 76개 테스트 (단위 64개 + UI 12개), 비즈니스 로직 100% 커버리지 |
 | 개발 환경 | Xcode 16.0+, macOS 14+ |
 
 ---
@@ -196,12 +196,11 @@ swift test --enable-code-coverage
 | Data | GitHubDTOsTests | 9 | DTO 매핑, Date 파싱 |
 | Data | GitHubRepositoryRepositoryImplTests | 6 | Repository 패턴, hasNextPage 계산 |
 | Data | UserDefaultsRecentSearchStoreTests | 8 | 저장/로드/삭제, UserDefaults |
-| Presentation | SearchViewModelTests | 16 | 검색, 최근 검색어, 자동완성, 네비게이션 |
+| Presentation | SearchViewModelTests | 16 | 검색, 페이지네이션, 자동완성, 네비게이션 |
 | Presentation | AppRouterTests | 6 | push, pop, popToRoot |
-| Presentation | ResultListViewModelTests | 9 | 페이지네이션, 새로고침, 에러 |
 | UI | SearchFlowUITests | 12 | 검색 흐름, 최근 검색어, 네비게이션 |
 
-**총 85개 테스트** (단위 71개 + UI 12개)
+**총 76개 테스트** (단위 64개 + UI 12개)
 
 ### 테스트 실행
 

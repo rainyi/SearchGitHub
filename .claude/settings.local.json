@@ -53,7 +53,8 @@
       "Bash(echo === 최종 프로젝트 구조 ===:*)",
       "Bash(xcodegen generate:*)",
       "mcp__plugin_context-mode_context-mode__ctx_execute",
-      "Bash(/Users/rainyi/Documents/Project/Study/SearchGitHub/GitHubSearch.xcworkspace/contents.xcworkspacedata:*)"
+      "Bash(/Users/rainyi/Documents/Project/Study/SearchGitHub/GitHubSearch.xcworkspace/contents.xcworkspacedata:*)",
+      "Bash(tuist generate:*)"
     ]
   }
 }
