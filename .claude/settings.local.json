@@ -57,7 +57,8 @@
       "Bash(tuist generate:*)",
       "Bash(xxd:*)",
       "Bash(tuist version:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(rm:*)"
     ]
   }
 }
