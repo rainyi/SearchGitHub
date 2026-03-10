@@ -8,41 +8,36 @@ final class SearchViewModel: ObservableObject {
     private let searchUseCase: SearchRepositoriesUseCase
     private let recentSearchUseCase: RecentSearchUseCase
     private let router: AppRouter
+    private let autocompleteManager: AutocompleteManager
 
     // MARK: - State
 
-    @Published var searchQuery: String = "" {
-        didSet {
-            updateAutocompleteSuggestions()
-        }
-    }
+    @Published var searchQuery: String = ""
+    @Published private(set) var searchState: SearchState
+    @Published private(set) var uiState: SearchUIState
     @Published var recentSearches: [RecentSearchItem] = []
     @Published var autocompleteSuggestions: [RecentSearchItem] = []
 
-    // 검색 결과 상태
-    @Published var repositories: [GitHubRepository] = []
-    @Published var totalCount: Int = 0
-    @Published var isSearching: Bool = false
-    @Published var isLoadingMore: Bool = false
-    @Published var hasSearched: Bool = false
-    @Published var error: AppError?
-    @Published var hasNextPage: Bool = false
-
-    private var currentPage: Int = 1
-    private var autocompleteTask: Task<Void, Never>?
-
     // MARK: - Computed Properties
+
+    var repositories: [GitHubRepository] { searchState.repositories }
+    var totalCount: Int { searchState.totalCount }
+    var isSearching: Bool { uiState.isSearching }
+    var isLoadingMore: Bool { uiState.isLoadingMore }
+    var hasSearched: Bool { searchState.hasSearched }
+    var error: AppError? { uiState.error }
+    var hasNextPage: Bool { searchState.hasNextPage }
 
     var isSearchButtonEnabled: Bool {
         !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isSearching
     }
 
     var shouldShowError: Bool {
-        error != nil && repositories.isEmpty
+        uiState.shouldShowError && searchState.isEmpty
     }
 
     var shouldShowEmptyState: Bool {
-        hasSearched && repositories.isEmpty && error == nil
+        hasSearched && searchState.isEmpty && uiState.error == nil
     }
 
     var shouldShowResults: Bool {
@@ -54,11 +49,17 @@ final class SearchViewModel: ObservableObject {
     init(
         searchUseCase: SearchRepositoriesUseCase,
         recentSearchUseCase: RecentSearchUseCase,
-        router: AppRouter
+        router: AppRouter,
+        autocompleteManager: AutocompleteManager = AutocompleteManager()
     ) {
         self.searchUseCase = searchUseCase
         self.recentSearchUseCase = recentSearchUseCase
         self.router = router
+        self.autocompleteManager = autocompleteManager
+        self.searchState = SearchState()
+        self.uiState = SearchUIState()
+
+        setupBindings()
     }
 
     // MARK: - Lifecycle
@@ -73,27 +74,19 @@ final class SearchViewModel: ObservableObject {
         let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedQuery.isEmpty else { return }
 
-        isSearching = true
-        error = nil
-        hasSearched = true
-        currentPage = 1
+        uiState.startSearch()
+        searchState.startNewSearch()
 
         do {
             try await recentSearchUseCase.addSearch(query: trimmedQuery)
             let result = try await searchUseCase.execute(keyword: trimmedQuery, page: 1)
-            repositories = result.repositories
-            totalCount = result.totalCount
-            hasNextPage = result.hasNextPage
+            searchState.setResults(result)
             await loadRecentSearches()
-        } catch let error as AppError {
-            self.error = error
-            repositories = []
         } catch {
-            self.error = .unknown(error)
-            repositories = []
+            handleSearchError(error)
         }
 
-        isSearching = false
+        uiState.finishSearch()
     }
 
     func loadNextPage() async {
@@ -102,23 +95,16 @@ final class SearchViewModel: ObservableObject {
         let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedQuery.isEmpty else { return }
 
-        isLoadingMore = true
-        currentPage += 1
+        uiState.startLoadingMore()
 
         do {
-            let result = try await searchUseCase.execute(keyword: trimmedQuery, page: currentPage)
-            repositories.append(contentsOf: result.repositories)
-            hasNextPage = result.hasNextPage
-        } catch _ as AppError {
-            currentPage -= 1
-            // 페이지네이션 에러는 사용자에게 표시하지 않고 조용히 처리
-            // (이미 일부 결과가 표시 중이므로 중단하지 않음)
+            let result = try await searchUseCase.execute(keyword: trimmedQuery, page: searchState.currentPage + 1)
+            searchState.appendResults(result)
         } catch {
-            currentPage -= 1
-            // 예상치 못한 에러 타입
+            searchState.revertPageIncrement()
         }
 
-        isLoadingMore = false
+        uiState.finishLoadingMore()
     }
 
     func refresh() async {
@@ -156,13 +142,31 @@ final class SearchViewModel: ObservableObject {
 
     func clearSearch() {
         searchQuery = ""
-        repositories = []
-        hasSearched = false
-        error = nil
-        totalCount = 0
+        searchState.reset()
+        uiState.clearError()
+        autocompleteSuggestions = []
     }
 
     // MARK: - Private Methods
+
+    private func setupBindings() {
+        // searchQuery 변경 시 자동완성 업데이트
+        $searchQuery
+            .sink { [weak self] query in
+                self?.updateAutocompleteSuggestions(query: query)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func updateAutocompleteSuggestions(query: String) {
+        autocompleteManager.updateSuggestions(
+            query: query,
+            recentSearches: recentSearches,
+            hasSearched: searchState.hasSearched
+        ) { [weak self] suggestions in
+            self?.autocompleteSuggestions = suggestions
+        }
+    }
 
     private func loadRecentSearches() async {
         do {
@@ -172,39 +176,20 @@ final class SearchViewModel: ObservableObject {
         }
     }
 
-    private func updateAutocompleteSuggestions() {
-        // 이전 태스크 취소
-        autocompleteTask?.cancel()
-
-        autocompleteTask = Task { @MainActor in
-            // 300ms 디바운스
-            try? await Task.sleep(nanoseconds: 300_000_000)
-
-            // 태스크가 취소되었는지 확인
-            guard !Task.isCancelled else { return }
-
-            let trimmedQuery = self.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-
-            // 1글자 이상일 때만 자동완성 표시
-            guard trimmedQuery.count >= 1 else {
-                self.autocompleteSuggestions = []
-                return
-            }
-
-            // 이미 검색 중이거나 결과가 표시 중이면 자동완성 숨김
-            guard !self.hasSearched else {
-                self.autocompleteSuggestions = []
-                return
-            }
-
-            // 최근 검색어에서 필터링 (대소문자 무시, 검색어 포함)
-            let queryLower = trimmedQuery.lowercased()
-            let filtered = self.recentSearches.filter { item in
-                item.query.lowercased().contains(queryLower)
-            }
-
-            // 최신순으로 정렬하고 최대 5개만 표시
-            self.autocompleteSuggestions = Array(filtered.prefix(5))
+    private func handleSearchError(_ error: Error) {
+        if let appError = error as? AppError {
+            uiState.setError(appError)
+        } else {
+            uiState.setError(.unknown(error))
         }
+        searchState.repositories = []
     }
+
+    // MARK: - Cancellables
+
+    private var cancellables: Set<AnyCancellable> = []
 }
+
+// MARK: - Combine Import
+
+import Combine

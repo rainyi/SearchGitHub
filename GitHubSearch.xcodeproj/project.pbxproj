@@ -39,6 +39,8 @@
 		E438CA7C4DAC9491A1FA8559 /* SearchViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C72B9987B1E4F74209A79C /* SearchViewModelTests.swift */; };
 		EF2DD1A2FEE0C365FA0FDC9E /* RecentSearchUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511E87DD78376ADE13E3846B /* RecentSearchUseCaseTests.swift */; };
 		FE2B3A54C4BABE027D8B90E2 /* MockRecentSearchStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 661F917D91B2124321F66F5F /* MockRecentSearchStore.swift */; };
+		72BFCB717EC58A0766507A98 /* SearchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608CB40E739A9A49D3E94CAC /* SearchState.swift */; };
+		4BFFB582EC6807A143DA265A /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AD80F10F0F7387EFBD16953 /* AutocompleteManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -127,6 +129,8 @@
 		CF5C84C28C3430F77D8D9B68 /* RepositoryWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryWebView.swift; sourceTree = "<group>"; };
 		DEAA5D2555D20C5B399A9950 /* GitHubRepositoryRepositoryImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubRepositoryRepositoryImpl.swift; sourceTree = "<group>"; };
 		F03AE734A9F3C59FA09FA58A /* InMemoryRecentSearchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryRecentSearchStore.swift; sourceTree = "<group>"; };
+		608CB40E739A9A49D3E94CAC /* SearchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchState.swift; sourceTree = "<group>"; };
+		7AD80F10F0F7387EFBD16953 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -338,6 +342,8 @@
 			children = (
 				40AF9196841535623414BC09 /* SearchView.swift */,
 				35C044E8266EA802F594F3B6 /* SearchViewModel.swift */,
+				608CB40E739A9A49D3E94CAC /* SearchState.swift */,
+				7AD80F10F0F7387EFBD16953 /* AutocompleteManager.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -533,6 +539,8 @@
 				4820F56EFF62294F0528D90E /* AppRouter.swift in Sources */,
 				48D4B5E37B1792207A70BDE5 /* SearchView.swift in Sources */,
 				0EDB2DDC1B7EAA7CCC8486C7 /* SearchViewModel.swift in Sources */,
+				72BFCB717EC58A0766507A98 /* SearchState.swift in Sources */,
+				4BFFB582EC6807A143DA265A /* AutocompleteManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
