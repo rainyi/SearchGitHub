@@ -182,7 +182,7 @@ final class ResultListViewModelTests: XCTestCase {
         // Given
         let router = AppRouter()
         // First push something
-        router.showResults(for: "test")
+        router.showDetail(url: URL(string: "https://github.com/test/repo")!)
         XCTAssertEqual(router.path.count, 1)
 
         let viewModel = createViewModel(router: router)

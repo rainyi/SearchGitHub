@@ -18,14 +18,6 @@ final class AppRouterTests: XCTestCase {
 
     // MARK: - Navigation Tests
 
-    func testShowResults_WhenCalled_ThenAppendsResultListToPath() {
-        // When
-        sut.showResults(for: "swift")
-
-        // Then
-        XCTAssertEqual(sut.path.count, 1)
-    }
-
     func testShowDetail_WhenCalled_ThenAppendsRepositoryDetailToPath() {
         // Given
         let url = URL(string: "https://github.com/apple/swift")!
@@ -39,7 +31,7 @@ final class AppRouterTests: XCTestCase {
 
     func testPop_WhenPathNotEmpty_ThenRemovesLast() {
         // Given
-        sut.showResults(for: "swift")
+        sut.showDetail(url: URL(string: "https://github.com/apple/swift")!)
         XCTAssertEqual(sut.path.count, 1)
 
         // When
@@ -59,9 +51,9 @@ final class AppRouterTests: XCTestCase {
 
     func testPopToRoot_WhenMultipleRoutes_ThenClearsAll() {
         // Given
-        sut.showResults(for: "swift")
         sut.showDetail(url: URL(string: "https://github.com/apple/swift")!)
-        sut.showResults(for: "ios")
+        sut.showDetail(url: URL(string: "https://github.com/apple/ios")!)
+        sut.showDetail(url: URL(string: "https://github.com/apple/combine")!)
         XCTAssertEqual(sut.path.count, 3)
 
         // When
@@ -83,9 +75,9 @@ final class AppRouterTests: XCTestCase {
 
     func testNavigationSequence_MultiplePushesAndPop() {
         // Given: push 3 routes
-        sut.showResults(for: "swift")
-        sut.showResults(for: "ios")
-        sut.showResults(for: "combine")
+        sut.showDetail(url: URL(string: "https://github.com/apple/swift")!)
+        sut.showDetail(url: URL(string: "https://github.com/apple/ios")!)
+        sut.showDetail(url: URL(string: "https://github.com/apple/combine")!)
         XCTAssertEqual(sut.path.count, 3)
 
         // When: pop 1

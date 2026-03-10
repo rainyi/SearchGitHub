@@ -3,9 +3,19 @@ import XCTest
 
 // MARK: - Mocks
 
-private struct MockSearchUseCase: SearchRepositoriesUseCase {
+private actor MockSearchUseCase: SearchRepositoriesUseCase {
+    nonisolated(unsafe) var capturedKeywords: [String] = []
+    nonisolated(unsafe) var capturedPages: [Int] = []
+    nonisolated(unsafe) var stubResult: SearchResult = SearchResult(repositories: [], totalCount: 0, hasNextPage: false)
+
     func execute(keyword: String, page: Int) async throws -> SearchResult {
-        SearchResult(repositories: [], totalCount: 0, hasNextPage: false)
+        capturedKeywords.append(keyword)
+        capturedPages.append(page)
+        return stubResult
+    }
+
+    nonisolated func getCallCount() -> Int {
+        capturedKeywords.count
     }
 }
 
@@ -51,15 +61,17 @@ private actor MockRecentSearchUseCase: RecentSearchUseCase {
 final class SearchViewModelTests: XCTestCase {
 
     private var sut: SearchViewModel!
+    private var mockSearchUseCase: MockSearchUseCase!
     private var mockRecentUseCase: MockRecentSearchUseCase!
     private var router: AppRouter!
 
     override func setUp() {
         super.setUp()
+        mockSearchUseCase = MockSearchUseCase()
         mockRecentUseCase = MockRecentSearchUseCase()
         router = AppRouter()
         sut = SearchViewModel(
-            searchUseCase: MockSearchUseCase(),
+            searchUseCase: mockSearchUseCase,
             recentSearchUseCase: mockRecentUseCase,
             router: router
         )
@@ -67,6 +79,7 @@ final class SearchViewModelTests: XCTestCase {
 
     override func tearDown() {
         sut = nil
+        mockSearchUseCase = nil
         mockRecentUseCase = nil
         router = nil
         super.tearDown()
@@ -78,7 +91,7 @@ final class SearchViewModelTests: XCTestCase {
         // Then
         XCTAssertTrue(sut.searchQuery.isEmpty)
         XCTAssertTrue(sut.recentSearches.isEmpty)
-        XCTAssertFalse(sut.isLoading)
+        XCTAssertFalse(sut.isSearching)
         XCTAssertNil(sut.error)
         XCTAssertFalse(sut.isSearchButtonEnabled)
     }
@@ -101,12 +114,12 @@ final class SearchViewModelTests: XCTestCase {
         XCTAssertFalse(sut.isSearchButtonEnabled)
     }
 
-    func testIsSearchButtonEnabled_WhenIsLoading_ThenFalse() {
+    func testIsSearchButtonEnabled_WhenIsSearching_ThenFalse() {
         // Given
         sut.searchQuery = "swift"
 
         // When
-        sut.isLoading = true
+        sut.isSearching = true
 
         // Then
         XCTAssertFalse(sut.isSearchButtonEnabled)
@@ -114,7 +127,7 @@ final class SearchViewModelTests: XCTestCase {
 
     // MARK: - Search Tests
 
-    func testSearch_WhenValidQuery_ThenAddsToRecentSearchesAndNavigates() async {
+    func testSearch_WhenValidQuery_ThenAddsToRecentSearchesAndUpdatesState() async {
         // Given
         sut.searchQuery = "swift"
 
@@ -123,8 +136,8 @@ final class SearchViewModelTests: XCTestCase {
 
         // Then
         XCTAssertEqual(mockRecentUseCase.capturedAddQuery, "swift")
-        XCTAssertEqual(router.path.count, 1)
-        XCTAssertFalse(sut.isLoading)
+        XCTAssertTrue(sut.hasSearched)
+        XCTAssertFalse(sut.isSearching)
         XCTAssertNil(sut.error)
     }
 
@@ -150,7 +163,7 @@ final class SearchViewModelTests: XCTestCase {
 
         // Then
         XCTAssertNotNil(sut.error)
-        XCTAssertFalse(sut.isLoading)
+        XCTAssertFalse(sut.isSearching)
         XCTAssertEqual(router.path.count, 0)
     }
 
@@ -236,5 +249,37 @@ final class SearchViewModelTests: XCTestCase {
         // Then
         XCTAssertTrue(mockRecentUseCase.clearAllCalled)
         XCTAssertTrue(sut.recentSearches.isEmpty)
+    }
+
+    // MARK: - Pull to Refresh Tests
+
+    func testRefresh_WhenCalled_ThenReloadsSearchResults() async {
+        // Given
+        sut.searchQuery = "swift"
+        await sut.search()
+        XCTAssertTrue(sut.hasSearched)
+        XCTAssertEqual(mockSearchUseCase.getCallCount(), 1)
+
+        // When - refresh는 search()를 다시 호출
+        await sut.refresh()
+
+        // Then - searchUseCase.execute가 2번째 호출됨 (새로고침)
+        XCTAssertEqual(mockSearchUseCase.getCallCount(), 2)
+        XCTAssertTrue(sut.hasSearched)
+        XCTAssertFalse(sut.isSearching)
+        XCTAssertNil(sut.error)
+    }
+
+    func testRefresh_WhenNoPreviousSearch_ThenDoesNothing() async {
+        // Given
+        sut.searchQuery = ""
+        XCTAssertFalse(sut.hasSearched)
+
+        // When
+        await sut.refresh()
+
+        // Then
+        XCTAssertFalse(sut.hasSearched)
+        XCTAssertNil(mockRecentUseCase.capturedAddQuery)
     }
 }
