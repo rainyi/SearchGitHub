@@ -12,6 +12,7 @@ struct SearchView: View {
     var body: some View {
         VStack(spacing: 0) {
             searchBar
+            autocompleteList
             content
         }
         .navigationTitle("Search")
@@ -75,6 +76,54 @@ struct SearchView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+    }
+
+    private var autocompleteList: some View {
+        Group {
+            if !viewModel.autocompleteSuggestions.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("추천 검색어")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .padding(.bottom, 4)
+
+                    ForEach(viewModel.autocompleteSuggestions) { item in
+                        Button {
+                            viewModel.selectRecentSearch(item)
+                            isSearchFieldFocused = false
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.query)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+
+                                    Text(formattedDate(item.searchedAt))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 10)
+                            .background(Color.white)
+                        }
+                        .buttonStyle(.plain)
+
+                        Divider()
+                            .padding(.leading, 40)
+                    }
+                }
+                .background(Color.gray.opacity(0.05))
+            }
+        }
     }
 
     @ViewBuilder

@@ -11,8 +11,13 @@ final class SearchViewModel: ObservableObject {
 
     // MARK: - State
 
-    @Published var searchQuery: String = ""
+    @Published var searchQuery: String = "" {
+        didSet {
+            updateAutocompleteSuggestions()
+        }
+    }
     @Published var recentSearches: [RecentSearchItem] = []
+    @Published var autocompleteSuggestions: [RecentSearchItem] = []
 
     // 검색 결과 상태
     @Published var repositories: [GitHubRepository] = []
@@ -24,6 +29,7 @@ final class SearchViewModel: ObservableObject {
     @Published var hasNextPage: Bool = false
 
     private var currentPage: Int = 1
+    private var autocompleteTask: Task<Void, Never>?
 
     // MARK: - Computed Properties
 
@@ -158,6 +164,42 @@ final class SearchViewModel: ObservableObject {
             recentSearches = try await recentSearchUseCase.getRecentSearches()
         } catch {
             recentSearches = []
+        }
+    }
+
+    private func updateAutocompleteSuggestions() {
+        // 이전 태스크 취소
+        autocompleteTask?.cancel()
+
+        autocompleteTask = Task { @MainActor in
+            // 300ms 디바운스
+            try? await Task.sleep(nanoseconds: 300_000_000)
+
+            // 태스크가 취소되었는지 확인
+            guard !Task.isCancelled else { return }
+
+            let trimmedQuery = self.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // 2글자 이상일 때만 자동완성 표시
+            guard trimmedQuery.count >= 2 else {
+                self.autocompleteSuggestions = []
+                return
+            }
+
+            // 이미 검색 중이거나 결과가 표시 중이면 자동완성 숨김
+            guard !self.hasSearched else {
+                self.autocompleteSuggestions = []
+                return
+            }
+
+            // 최근 검색어에서 필터링 (대소문자 무시, 검색어 포함)
+            let queryLower = trimmedQuery.lowercased()
+            let filtered = self.recentSearches.filter { item in
+                item.query.lowercased().contains(queryLower)
+            }
+
+            // 최신순으로 정렬하고 최대 5개만 표시
+            self.autocompleteSuggestions = Array(filtered.prefix(5))
         }
     }
 }

@@ -282,4 +282,123 @@ final class SearchViewModelTests: XCTestCase {
         XCTAssertFalse(sut.hasSearched)
         XCTAssertNil(mockRecentUseCase.capturedAddQuery)
     }
+
+    // MARK: - Autocomplete Tests
+
+    func testAutocomplete_WhenQuery2CharsAndMatchesExist_ThenShowsSuggestions() async {
+        // Given
+        let items = [
+            RecentSearchItem(query: "swift", searchedAt: Date()),
+            RecentSearchItem(query: "swiftui", searchedAt: Date().addingTimeInterval(-3600)),
+            RecentSearchItem(query: "ios", searchedAt: Date().addingTimeInterval(-7200))
+        ]
+        mockRecentUseCase.setMockItems(items)
+        await sut.onAppear()
+
+        // When
+        sut.searchQuery = "sw"
+
+        // 디바운스 대기 (300ms + 10ms 여유)
+        try? await Task.sleep(nanoseconds: 310_000_000)
+
+        // Then
+        XCTAssertEqual(sut.autocompleteSuggestions.count, 2)
+        XCTAssertEqual(sut.autocompleteSuggestions[0].query, "swift")
+        XCTAssertEqual(sut.autocompleteSuggestions[1].query, "swiftui")
+    }
+
+    func testAutocomplete_WhenQueryLessThan2Chars_ThenNoSuggestions() async {
+        // Given
+        let items = [
+            RecentSearchItem(query: "swift", searchedAt: Date())
+        ]
+        mockRecentUseCase.setMockItems(items)
+        await sut.onAppear()
+
+        // When
+        sut.searchQuery = "s"
+
+        // Then
+        XCTAssertTrue(sut.autocompleteSuggestions.isEmpty)
+    }
+
+    func testAutocomplete_WhenAlreadySearched_ThenNoSuggestions() async {
+        // Given
+        let items = [
+            RecentSearchItem(query: "swift", searchedAt: Date())
+        ]
+        mockRecentUseCase.setMockItems(items)
+        await sut.onAppear()
+        sut.searchQuery = "swift"
+        await sut.search()
+
+        // When
+        sut.searchQuery = "swi"
+
+        // Then
+        XCTAssertTrue(sut.autocompleteSuggestions.isEmpty)
+    }
+
+    func testAutocomplete_WhenQueryWithDifferentCase_ThenMatchesCaseInsensitive() async {
+        // Given
+        let items = [
+            RecentSearchItem(query: "Swift", searchedAt: Date()),
+            RecentSearchItem(query: "SWIFTUI", searchedAt: Date())
+        ]
+        mockRecentUseCase.setMockItems(items)
+        await sut.onAppear()
+
+        // When
+        sut.searchQuery = "sw"
+
+        // 디바운스 대기
+        try? await Task.sleep(nanoseconds: 350_000_000)
+
+        // Then
+        XCTAssertEqual(sut.autocompleteSuggestions.count, 2)
+        XCTAssertEqual(sut.autocompleteSuggestions[0].query, "Swift")
+        XCTAssertEqual(sut.autocompleteSuggestions[1].query, "SWIFTUI")
+    }
+
+    func testAutocomplete_WhenQueryWithWhitespace_ThenTrimsAndMatches() async {
+        // Given
+        let items = [
+            RecentSearchItem(query: "swift", searchedAt: Date())
+        ]
+        mockRecentUseCase.setMockItems(items)
+        await sut.onAppear()
+
+        // When
+        sut.searchQuery = "  sw  "
+
+        // 디바운스 대기
+        try? await Task.sleep(nanoseconds: 350_000_000)
+
+        // Then
+        XCTAssertEqual(sut.autocompleteSuggestions.count, 1)
+        XCTAssertEqual(sut.autocompleteSuggestions[0].query, "swift")
+    }
+
+    func testAutocomplete_WhenMoreThan5Matches_ThenShowsOnly5() async {
+        // Given
+        let items = [
+            RecentSearchItem(query: "swift", searchedAt: Date()),
+            RecentSearchItem(query: "swiftui", searchedAt: Date().addingTimeInterval(-3600)),
+            RecentSearchItem(query: "swing", searchedAt: Date().addingTimeInterval(-7200)),
+            RecentSearchItem(query: "swell", searchedAt: Date().addingTimeInterval(-10800)),
+            RecentSearchItem(query: "sword", searchedAt: Date().addingTimeInterval(-14400)),
+            RecentSearchItem(query: "swan", searchedAt: Date().addingTimeInterval(-18000))
+        ]
+        mockRecentUseCase.setMockItems(items)
+        await sut.onAppear()
+
+        // When
+        sut.searchQuery = "sw"
+
+        // 디바운스 대기
+        try? await Task.sleep(nanoseconds: 350_000_000)
+
+        // Then
+        XCTAssertEqual(sut.autocompleteSuggestions.count, 5)
+    }
 }
