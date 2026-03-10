@@ -135,9 +135,8 @@
   - [x] GitHubDTOs 테스트 (9개)
   - [x] GitHubRepositoryRepositoryImpl 테스트 (6개)
 - [x] Presentation 테스트
-  - [x] SearchViewModel 테스트 (12개)
-  - [x] ResultListViewModel 테스트 (9개)
-  - [x] AppRouter 테스트 (7개)
+  - [x] SearchViewModel 테스트 (16개)
+  - [x] AppRouter 테스트 (6개)
 - [x] UI 테스트
   - [x] SearchFlowUITests (12개)
 - [x] 에러 시나리오 테스트
@@ -152,11 +151,11 @@
 - Data Layer: 100%
 - Presentation Layer: 80-90%
 
-### Phase 5 – 추가 구현 (선택) 🔄 일부 완료
+### Phase 5 – 추가 구현 (선택) ✅ 완료
 
-- [ ] 자동완성 기능 (최근 검색어 기반)
+- [x] 자동완성 기능 (최근 검색어 기반)
 - [x] 스크롤 중 Next Page 미리 호출 (마지막 3개 아이템에서 로드)
-- [ ] Pull-to-refresh
+- [x] Pull-to-refresh
 - [x] 결과 총 개수 표시 (애니메이션 미적용)
 
 ## 5. 에러 처리 전략
@@ -177,7 +176,7 @@
 | **전체 Phase** | ✅ 완료 | 1~4 Phase + UI/UX 개선 |
 | **총 테스트** | 76개 | 단위 64개 + UI 12개 |
 | **핵심 기능** | ✅ 완료 | 검색, 페이지네이션, 최근 검색어, WebView |
-| **남은 작업** | 2개 | 자동완성, Pull-to-refresh |
+| **남은 작업** | 0개 | 모두 완료 |
 
 ### 완료된 주요 기능
 - ✅ GitHub 저장소 검색 (async/await)
