@@ -1,7 +1,6 @@
 import Foundation
 
 /// 메모리 기반 최근 검색어 저장소 (테스트용)
-@MainActor
 final class InMemoryRecentSearchStore: RecentSearchStore {
 
     // MARK: - Properties

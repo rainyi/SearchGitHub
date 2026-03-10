@@ -1,7 +1,6 @@
 import Foundation
 
 /// 최근 검색어 저장소 인터페이스
-@MainActor
 protocol RecentSearchStore {
     /// 최근 검색어 목록 로드
     func load() async throws -> [RecentSearchItem]

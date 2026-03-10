@@ -1,7 +1,6 @@
 import Foundation
 
 /// UserDefaults 기반 최근 검색어 저장소
-@MainActor
 final class UserDefaultsRecentSearchStore: RecentSearchStore {
 
     // MARK: - Constants
