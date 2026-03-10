@@ -1,5 +1,5 @@
 import Foundation
-@testable import GitHubSearch
+@testable import GitHubSearchApp
 
 /// 테스트용 InMemory RecentSearchStore
 final class MockRecentSearchStore: RecentSearchStore {

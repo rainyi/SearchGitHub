@@ -1,5 +1,5 @@
 import XCTest
-@testable import GitHubSearch
+@testable import GitHubSearchApp
 
 // MARK: - Mocks
 
@@ -9,6 +9,7 @@ private final class MockSearchUseCaseForPagination: SearchRepositoriesUseCase {
     var capturedPages: [Int] = []
     var stubResults: [Int: SearchResult] = [:]
     var stubError: Error?
+    var stubErrors: [Int: Error] = [:]
     var invalidateCacheCalled = false
     var invalidatedKeyword: String?
 
@@ -16,6 +17,12 @@ private final class MockSearchUseCaseForPagination: SearchRepositoriesUseCase {
         capturedKeywords.append(keyword)
         capturedPages.append(page)
 
+        // 페이지별 에러 우선 확인
+        if let pageError = stubErrors[page] {
+            throw pageError
+        }
+
+        // 전역 에러 확인
         if let error = stubError {
             throw error
         }
@@ -214,7 +221,7 @@ final class SearchViewModelPaginationTests: XCTestCase {
         )
 
         // Second page will throw error
-        mockSearchUseCase.stubError = AppError.network(NSError(domain: "test", code: -1))
+        mockSearchUseCase.stubErrors[2] = AppError.network(NSError(domain: "test", code: -1))
 
         // Initial search
         await sut.search()

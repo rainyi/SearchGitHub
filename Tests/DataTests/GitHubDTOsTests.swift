@@ -1,5 +1,5 @@
 import XCTest
-@testable import GitHubSearch
+@testable import GitHubSearchApp
 
 /// GitHub DTOs 단위 테스트
 final class GitHubDTOsTests: XCTestCase {
@@ -36,14 +36,14 @@ final class GitHubDTOsTests: XCTestCase {
     }
 
     func testToEntity_WhenInvalidHtmlUrl_ThenReturnsNil() {
-        // Given
+        // Given: URL(string:)이 nil을 반환하는 진짜 invalid URL 사용
         let dto = GitHubRepositoryDTO(
             id: 1,
             name: "swift",
             fullName: "apple/swift",
             owner: GitHubOwnerDTO(login: "apple", avatarUrl: "https://avatars.githubusercontent.com/u/1?v=4"),
             description: nil,
-            htmlUrl: "not a valid url",
+            htmlUrl: "ht!tp://[invalid",
             stargazersCount: 0,
             language: nil,
             forksCount: 0,
@@ -58,12 +58,12 @@ final class GitHubDTOsTests: XCTestCase {
     }
 
     func testToEntity_WhenInvalidAvatarUrl_ThenReturnsNil() {
-        // Given
+        // Given: URL(string:)이 nil을 반환하는 진짜 invalid URL 사용
         let dto = GitHubRepositoryDTO(
             id: 1,
             name: "swift",
             fullName: "apple/swift",
-            owner: GitHubOwnerDTO(login: "apple", avatarUrl: "not a valid url"),
+            owner: GitHubOwnerDTO(login: "apple", avatarUrl: "ht!tp://[invalid"),
             description: nil,
             htmlUrl: "https://github.com/apple/swift",
             stargazersCount: 0,
@@ -104,9 +104,10 @@ final class GitHubDTOsTests: XCTestCase {
         XCTAssertNotNil(entity)
         XCTAssertNotNil(entity?.updatedAt)
 
-        // Verify the date components
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: entity!.updatedAt!)
+        // Verify the date components using UTC calendar (ISO8601 formatter uses UTC)
+        var utcCalendar = Calendar(identifier: .gregorian)
+        utcCalendar.timeZone = TimeZone(identifier: "UTC")!
+        let components = utcCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: entity!.updatedAt!)
         XCTAssertEqual(components.year, 2024)
         XCTAssertEqual(components.month, 3)
         XCTAssertEqual(components.day, 10)
@@ -138,9 +139,10 @@ final class GitHubDTOsTests: XCTestCase {
         XCTAssertNotNil(entity)
         XCTAssertNotNil(entity?.updatedAt)
 
-        // Verify the date components
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: entity!.updatedAt!)
+        // Verify the date components using UTC calendar (ISO8601 formatter uses UTC)
+        var utcCalendar = Calendar(identifier: .gregorian)
+        utcCalendar.timeZone = TimeZone(identifier: "UTC")!
+        let components = utcCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: entity!.updatedAt!)
         XCTAssertEqual(components.year, 2024)
         XCTAssertEqual(components.month, 3)
         XCTAssertEqual(components.day, 10)
@@ -242,7 +244,7 @@ final class GitHubDTOsTests: XCTestCase {
     }
 
     func testToEntities_WhenSomeItemsInvalid_ThenReturnsValidEntitiesOnly() {
-        // Given
+        // Given: 두 번째 아이템은 진짜 invalid URL 사용
         let response = GitHubSearchResponseDTO(
             totalCount: 2,
             incompleteResults: false,
@@ -263,7 +265,7 @@ final class GitHubDTOsTests: XCTestCase {
                     id: 2,
                     name: "invalid",
                     fullName: "user/invalid",
-                    owner: GitHubOwnerDTO(login: "user", avatarUrl: "not valid"),
+                    owner: GitHubOwnerDTO(login: "user", avatarUrl: "ht!tp://[invalid"),
                     description: nil,
                     htmlUrl: "https://github.com/user/invalid",
                     stargazersCount: 0,
