@@ -108,7 +108,6 @@
 		4838A5544273AA6FF1F8FD49 /* UserDefaultsRecentSearchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsRecentSearchStore.swift; sourceTree = "<group>"; };
 		4CD6F062856ABB6625653094 /* GitHubSearchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GitHubSearchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		511E87DD78376ADE13E3846B /* RecentSearchUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchUseCaseTests.swift; sourceTree = "<group>"; };
-		5124D0B21926ED5566E8510B /* GitHubSearchTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GitHubSearchTests-Info.plist"; sourceTree = "<group>"; };
 		618511BC342F8A22F05DA3A8 /* UserDefaultsRecentSearchStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsRecentSearchStoreTests.swift; sourceTree = "<group>"; };
 		626C48401DD9D1BB53E5EB57 /* AppRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoute.swift; sourceTree = "<group>"; };
 		661F917D91B2124321F66F5F /* MockRecentSearchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRecentSearchStore.swift; sourceTree = "<group>"; };
@@ -116,13 +115,11 @@
 		6750FF08F711507DE1B5D482 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		6FFFCCE8A0707B964BC07F57 /* GitHubRepositoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubRepositoryRepository.swift; sourceTree = "<group>"; };
 		7448ECF38F318223BD7EF639 /* RecentSearchUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchUseCase.swift; sourceTree = "<group>"; };
-		75908C334A3B8E3543EDF572 /* GitHubSearch-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GitHubSearch-Info.plist"; sourceTree = "<group>"; };
 		7820D73E43F8F7AFF562F15B /* GitHubSearchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitHubSearchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D0856DFD435DF1387B8286D /* GitHubAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubAPIClient.swift; sourceTree = "<group>"; };
 		7F510D22B336822C58C252BC /* RecentSearchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchStore.swift; sourceTree = "<group>"; };
 		85C72B9987B1E4F74209A79C /* SearchViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModelTests.swift; sourceTree = "<group>"; };
 		8C9FEC43D13F26B4A22C5F14 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
-		982934653B5DB4435506EDA5 /* GitHubSearchUITests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GitHubSearchUITests-Info.plist"; sourceTree = "<group>"; };
 		AC4340E04A584F24816323F6 /* GitHubDTOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubDTOs.swift; sourceTree = "<group>"; };
 		B4EBEE899586C0EF09EF972B /* GitHubRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubRepository.swift; sourceTree = "<group>"; };
 		BF1ED0DD69DCFF90CC912E08 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
@@ -345,14 +342,6 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
-		C960BB64128C78C79A78BA05 /* Derived */ = {
-			isa = PBXGroup;
-			children = (
-				DED6628469596F3F350DC482 /* InfoPlists */,
-			);
-			path = Derived;
-			sourceTree = "<group>";
-		};
 		DD97251E91EBCC78CA75A1CA /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -362,16 +351,6 @@
 				FDD33491F6319D57671E0BD3 /* UITests */,
 			);
 			path = Tests;
-			sourceTree = "<group>";
-		};
-		DED6628469596F3F350DC482 /* InfoPlists */ = {
-			isa = PBXGroup;
-			children = (
-				75908C334A3B8E3543EDF572 /* GitHubSearch-Info.plist */,
-				5124D0B21926ED5566E8510B /* GitHubSearchTests-Info.plist */,
-				982934653B5DB4435506EDA5 /* GitHubSearchUITests-Info.plist */,
-			);
-			path = InfoPlists;
 			sourceTree = "<group>";
 		};
 		ECBDC2C0CCC7E19C8276AF21 /* DataTests */ = {
@@ -386,7 +365,6 @@
 		F825D1054FD952E1ABBE6668 /* Project */ = {
 			isa = PBXGroup;
 			children = (
-				C960BB64128C78C79A78BA05 /* Derived */,
 				689794B9B20C3AB151418EFE /* Sources */,
 				DD97251E91EBCC78CA75A1CA /* Tests */,
 			);
