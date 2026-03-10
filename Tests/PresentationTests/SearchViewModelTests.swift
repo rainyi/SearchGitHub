@@ -8,11 +8,18 @@ private final class MockSearchUseCase: SearchRepositoriesUseCase {
     var capturedKeywords: [String] = []
     var capturedPages: [Int] = []
     var stubResult: SearchResult = SearchResult(repositories: [], totalCount: 0, hasNextPage: false)
+    var invalidateCacheCalled = false
+    var invalidatedKeyword: String?
 
     func execute(keyword: String, page: Int) async throws -> SearchResult {
         capturedKeywords.append(keyword)
         capturedPages.append(page)
         return stubResult
+    }
+
+    func invalidateCache(for keyword: String) {
+        invalidateCacheCalled = true
+        invalidatedKeyword = keyword
     }
 
     func getCallCount() -> Int {
@@ -314,6 +321,62 @@ final class SearchViewModelTests: XCTestCase {
         // Then
         XCTAssertFalse(sut.hasSearched)
         XCTAssertNil(mockRecentUseCase.capturedAddQuery)
+    }
+
+    // MARK: - Invalidate Cache Tests
+
+    func testRefresh_WhenCalled_ThenInvalidatesCache() async {
+        // Given
+        sut.searchQuery = "swift"
+        mockSearchUseCase.stubResult = SearchResult(
+            repositories: [GitHubRepository.sample],
+            totalCount: 1,
+            hasNextPage: false
+        )
+
+        // Initial search
+        await sut.search()
+        XCTAssertFalse(mockSearchUseCase.invalidateCacheCalled)
+
+        // When - refresh should invalidate cache
+        await sut.refresh()
+
+        // Then
+        XCTAssertTrue(mockSearchUseCase.invalidateCacheCalled)
+        XCTAssertEqual(mockSearchUseCase.invalidatedKeyword, "swift")
+    }
+
+    func testRefresh_WhenCalledWithWhitespaceQuery_ThenInvalidatesCacheWithTrimmedKeyword() async {
+        // Given
+        sut.searchQuery = "  swift  "
+        mockSearchUseCase.stubResult = SearchResult(
+            repositories: [GitHubRepository.sample],
+            totalCount: 1,
+            hasNextPage: false
+        )
+
+        // Initial search
+        await sut.search()
+        XCTAssertFalse(mockSearchUseCase.invalidateCacheCalled)
+
+        // When - refresh should invalidate cache with trimmed keyword
+        await sut.refresh()
+
+        // Then
+        XCTAssertTrue(mockSearchUseCase.invalidateCacheCalled)
+        XCTAssertEqual(mockSearchUseCase.invalidatedKeyword, "swift")
+    }
+
+    func testRefresh_WhenEmptyQuery_ThenDoesNotInvalidateCache() async {
+        // Given
+        sut.searchQuery = ""
+
+        // When
+        await sut.refresh()
+
+        // Then
+        XCTAssertFalse(mockSearchUseCase.invalidateCacheCalled)
+        XCTAssertNil(mockSearchUseCase.invalidatedKeyword)
     }
 
     // MARK: - Autocomplete Tests

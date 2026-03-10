@@ -45,16 +45,7 @@ private func createSearchViewModelWithText() -> SearchViewModel {
 
 @MainActor
 private func createSearchViewModelWithResults() -> SearchViewModel {
-    let viewModel = SearchViewModel(
-        searchUseCase: MockSearchRepositoriesUseCaseWithResults(),
-        recentSearchUseCase: MockRecentSearchUseCasePreview(),
-        router: AppRouter()
-    )
-    viewModel.searchQuery = "swift"
-    viewModel.hasSearched = true
-    viewModel.totalCount = 100
-    viewModel.hasNextPage = true
-    viewModel.repositories = (1...10).map { index in
+    let repositories = (1...10).map { index in
         GitHubRepository(
             id: index,
             name: "repo-\(index)",
@@ -70,7 +61,22 @@ private func createSearchViewModelWithResults() -> SearchViewModel {
             updatedAt: Date()
         )
     }
-    return viewModel
+
+    let initialState = SearchState(
+        repositories: repositories,
+        totalCount: 100,
+        hasNextPage: true,
+        currentPage: 1,
+        hasSearched: true
+    )
+
+    return SearchViewModel(
+        searchUseCase: MockSearchRepositoriesUseCaseWithResults(),
+        recentSearchUseCase: MockRecentSearchUseCasePreview(),
+        router: AppRouter(),
+        initialQuery: "swift",
+        initialState: initialState
+    )
 }
 
 // MARK: - Preview Mocks
@@ -79,6 +85,8 @@ private struct MockSearchRepositoriesUseCase: SearchRepositoriesUseCase {
     func execute(keyword: String, page: Int) async throws -> SearchResult {
         SearchResult(repositories: [], totalCount: 0, hasNextPage: false)
     }
+
+    func invalidateCache(for keyword: String) {}
 }
 
 private struct MockSearchRepositoriesUseCaseWithResults: SearchRepositoriesUseCase {
@@ -107,6 +115,8 @@ private struct MockSearchRepositoriesUseCaseWithResults: SearchRepositoriesUseCa
             hasNextPage: page < 10
         )
     }
+
+    func invalidateCache(for keyword: String) {}
 }
 
 @MainActor

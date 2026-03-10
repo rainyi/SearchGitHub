@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 final class SearchViewModel: ObservableObject {
@@ -62,6 +63,26 @@ final class SearchViewModel: ObservableObject {
         setupBindings()
     }
 
+    /// Preview용 초기화 - 지정된 상태로 ViewModel 생성
+    init(
+        searchUseCase: SearchRepositoriesUseCase,
+        recentSearchUseCase: RecentSearchUseCase,
+        router: AppRouter,
+        initialQuery: String = "",
+        initialState: SearchState = SearchState(),
+        autocompleteManager: AutocompleteManager = AutocompleteManager()
+    ) {
+        self.searchUseCase = searchUseCase
+        self.recentSearchUseCase = recentSearchUseCase
+        self.router = router
+        self.autocompleteManager = autocompleteManager
+        self.searchState = initialState
+        self.uiState = SearchUIState()
+        self.searchQuery = initialQuery
+
+        setupBindings()
+    }
+
     // MARK: - Lifecycle
 
     func onAppear() async {
@@ -108,7 +129,15 @@ final class SearchViewModel: ObservableObject {
     }
 
     func refresh() async {
+        // Pull to Refresh 시 캐시 무효화 후 재검색
+        invalidateCacheForCurrentQuery()
         await search()
+    }
+
+    private func invalidateCacheForCurrentQuery() {
+        let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else { return }
+        searchUseCase.invalidateCache(for: trimmedQuery)
     }
 
     func selectRecentSearch(_ item: RecentSearchItem) {
@@ -123,7 +152,8 @@ final class SearchViewModel: ObservableObject {
             try await recentSearchUseCase.deleteSearch(id: id)
             await loadRecentSearches()
         } catch {
-            // Silently handle deletion error
+            // Deletion error is non-critical; log for debugging
+            print("[SearchViewModel] Failed to delete recent search: \(error)")
         }
     }
 
@@ -132,7 +162,8 @@ final class SearchViewModel: ObservableObject {
             try await recentSearchUseCase.clearAll()
             await loadRecentSearches()
         } catch {
-            // Silently handle clear error
+            // Clear error is non-critical; log for debugging
+            print("[SearchViewModel] Failed to clear recent searches: \(error)")
         }
     }
 
@@ -189,7 +220,3 @@ final class SearchViewModel: ObservableObject {
 
     private var cancellables: Set<AnyCancellable> = []
 }
-
-// MARK: - Combine Import
-
-import Combine

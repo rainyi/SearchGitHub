@@ -9,6 +9,10 @@ protocol SearchRepositoriesUseCase {
     ///   - page: 페이지 번호 (1부터 시작)
     /// - Returns: 검색 결과
     func execute(keyword: String, page: Int) async throws -> SearchResult
+
+    /// 특정 키워드의 캐시 무효화
+    /// - Parameter keyword: 무효화할 검색어
+    func invalidateCache(for keyword: String)
 }
 
 // MARK: - Default Implementation
@@ -55,7 +59,6 @@ final class DefaultSearchRepositoriesUseCase: SearchRepositoriesUseCase {
 
     /// 특정 키워드의 캐시 무효화
     func invalidateCache(for keyword: String) {
-        let trimmedKeyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
-        cache.invalidate(keyword: trimmedKeyword)
+        cache.invalidate(keyword: keyword.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 }

@@ -8,10 +8,12 @@ final class MockGitHubRepositoryRepository: GitHubRepositoryRepository {
     var stubError: Error?
     var capturedKeyword: String?
     var capturedPage: Int?
+    private var callCount: Int = 0
 
     func search(keyword: String, page: Int) async throws -> SearchResult {
         capturedKeyword = keyword
         capturedPage = page
+        callCount += 1
 
         if let error = stubError {
             throw error
@@ -22,5 +24,9 @@ final class MockGitHubRepositoryRepository: GitHubRepositoryRepository {
             totalCount: 0,
             hasNextPage: false
         )
+    }
+
+    func getCallCount() -> Int {
+        return callCount
     }
 }

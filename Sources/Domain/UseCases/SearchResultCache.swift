@@ -1,6 +1,7 @@
 import Foundation
 
 /// 검색 결과 캐시 엔트리
+/// - Note: NSCache 저장을 위해 final class 사용
 final class CacheEntry {
     let result: SearchResult
     let timestamp: Date
@@ -12,16 +13,16 @@ final class CacheEntry {
 }
 
 /// 검색 결과 메모리 캐시 매니저
-@MainActor
+/// - Note: NSCache는 thread-safe하므로 @MainActor 불필요
 final class SearchResultCache {
     static let shared = SearchResultCache()
 
     private let cache = NSCache<NSString, CacheEntry>()
-    private let expirationInterval: TimeInterval = 300 // 5분
+    private let expirationInterval: TimeInterval
 
-    private init() {
-        // 메모리 경고 시 캐시 비우기
-        cache.countLimit = 50 // 최대 50개 항목
+    init(expirationInterval: TimeInterval = 300) {
+        self.expirationInterval = expirationInterval
+        cache.countLimit = 50
     }
 
     /// 캐시에서 검색 결과 조회

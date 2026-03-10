@@ -5,7 +5,7 @@ struct RepositoryListCell: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Thumbnail
+            // Thumbnail with caching (uses URLCache.shared automatically)
             AsyncImage(url: repository.owner.avatarUrl) { phase in
                 switch phase {
                 case .empty:
