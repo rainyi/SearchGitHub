@@ -64,8 +64,6 @@ mcp.json
 
 # Tuist
 Derived/
-GitHubSearch.xcodeproj/
-GitHubSearch.xcworkspace/
 
 # Temporary scripts
 auto_search_test.sh
