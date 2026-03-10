@@ -1,5 +1,5 @@
 import XCTest
-@testable import GitHubSearchApp
+@testable import GitHubSearch
 
 /// 이미지 캐싱 테스트
 final class ImageCacheTests: XCTestCase {
