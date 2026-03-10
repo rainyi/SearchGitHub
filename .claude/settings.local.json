@@ -59,7 +59,8 @@
       "Bash(tuist version:*)",
       "Bash(cp:*)",
       "Bash(rm:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(ruby:*)"
     ]
   }
 }

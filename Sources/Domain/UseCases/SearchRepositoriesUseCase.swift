@@ -16,9 +16,14 @@ protocol SearchRepositoriesUseCase {
 @MainActor
 final class DefaultSearchRepositoriesUseCase: SearchRepositoriesUseCase {
     private let repository: GitHubRepositoryRepository
+    private let cache: SearchResultCache
 
-    init(repository: GitHubRepositoryRepository) {
+    init(
+        repository: GitHubRepositoryRepository,
+        cache: SearchResultCache = .shared
+    ) {
         self.repository = repository
+        self.cache = cache
     }
 
     func execute(keyword: String, page: Int) async throws -> SearchResult {
@@ -32,6 +37,25 @@ final class DefaultSearchRepositoriesUseCase: SearchRepositoriesUseCase {
             throw AppError.invalidParameter("page must be greater than 0")
         }
 
-        return try await repository.search(keyword: trimmedKeyword, page: page)
+        // 캐시 확인 (첫 페이지만 캐싱)
+        if page == 1, let cachedResult = cache.get(keyword: trimmedKeyword, page: page) {
+            return cachedResult
+        }
+
+        // API 호출
+        let result = try await repository.search(keyword: trimmedKeyword, page: page)
+
+        // 결과 캐싱 (첫 페이지만)
+        if page == 1 {
+            cache.set(keyword: trimmedKeyword, page: page, result: result)
+        }
+
+        return result
+    }
+
+    /// 특정 키워드의 캐시 무효화
+    func invalidateCache(for keyword: String) {
+        let trimmedKeyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
+        cache.invalidate(keyword: trimmedKeyword)
     }
 }
