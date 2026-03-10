@@ -2,7 +2,6 @@ import Foundation
 
 // MARK: - API Client Protocol
 
-@MainActor
 protocol GitHubAPIClient: Sendable {
     /// GitHub 저장소 검색
     /// - Parameters:
@@ -16,7 +15,6 @@ protocol GitHubAPIClient: Sendable {
 // MARK: - Implementation
 
 /// GitHub API 클라이언트 기본 구현
-@MainActor
 final class DefaultGitHubAPIClient: GitHubAPIClient {
 
     // MARK: - Properties
@@ -27,14 +25,17 @@ final class DefaultGitHubAPIClient: GitHubAPIClient {
     private let defaultPerPage = 30
     private let decoder: JSONDecoder
 
+    // MARK: - Constants
+
+    /// GitHub API base URL - guaranteed valid constant
+    private static let gitHubBaseURLString = "https://api.github.com"
+
     // MARK: - Initialization
 
     init(session: URLSession = .shared) {
         self.session = session
-        guard let url = URL(string: "https://api.github.com") else {
-            fatalError("Invalid GitHub API base URL")
-        }
-        self.baseURL = url
+        // Force unwrap is safe here because the URL string is a compile-time constant
+        self.baseURL = URL(string: Self.gitHubBaseURLString)!
         self.decoder = JSONDecoder()
     }
 

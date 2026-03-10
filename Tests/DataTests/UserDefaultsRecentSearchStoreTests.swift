@@ -1,5 +1,5 @@
 import XCTest
-@testable import GitHubSearch
+@testable import GitHubSearchApp
 
 @MainActor
 final class UserDefaultsRecentSearchStoreTests: XCTestCase {
