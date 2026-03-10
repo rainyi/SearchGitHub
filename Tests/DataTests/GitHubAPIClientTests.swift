@@ -432,7 +432,7 @@ final class GitHubAPIClientTests: XCTestCase {
                     "full_name": "user/invalid",
                     "owner": {
                         "login": "user",
-                        "avatar_url": "not a valid url"
+                        "avatar_url": "ht!tp://[invalid"
                     },
                     "description": null,
                     "html_url": "https://github.com/user/invalid",
