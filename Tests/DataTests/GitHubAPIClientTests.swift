@@ -1,5 +1,5 @@
 import XCTest
-@testable import GitHubSearch
+@testable import GitHubSearchApp
 
 /// GitHubAPIClient 단위 테스트
 @MainActor
