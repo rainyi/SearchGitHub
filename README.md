@@ -167,7 +167,26 @@ Xcode가 자동으로 SPM 프로젝트를 로드합니다. 그 후:
    - iPhone 16 시뮬레이터 선택 (iOS 17.0+)
    - `Cmd + R` 로 앱 빌드 및 실행
 
-### 방법 2: Swift Package Manager만으로 테스트 실행
+### 방법 2: Xcode에서 GitHubSearch.xcworkspace 열기
+
+```bash
+# 저장소 클론
+git clone https://github.com/your-id/GitHubSearch-iOS.git
+cd GitHubSearch-iOS
+
+# Xcode에서 xcworkspace 열기
+open GitHubSearch.xcworkspace
+```
+
+xcworkspace는 이미 설정된 iOS 앱 타겟(GitHubSearchApp)을 포함하고 있습니다:
+
+1. **Xcode에서 GitHubSearch.xcworkspace 열기**
+
+2. **시뮬레이터 선택 및 실행**:
+   - 상단 도구모음에서 iPhone 16 시뮬레이터 선택 (iOS 17.0+)
+   - `Cmd + R`로 앱 빌드 및 실행
+
+### 방법 3: Swift Package Manager만으로 테스트 실행
 
 ```bash
 # 전체 테스트 실행 (단위 테스트만, iOS 시뮬레이터 불필요)
@@ -288,7 +307,22 @@ GET https://api.github.com/search/repositories?q={keyword}&page={page}&per_page=
 
 ---
 
-## 9. 향후 개선 아이디어
+## 9. 프로젝트 문서
+
+프로젝트 관련 상세 문서는 `docs/` 폴터에서 확인할 수 있습니다:
+
+| 문서 | 설명 |
+|------|------|
+| [docs/AI_ASSIST.md](docs/AI_ASSIST.md) | AI Assist 활용 기록 및 프롬프트 |
+| [docs/ARCHITECT.md](docs/ARCHITECT.md) | 아키텍처 설계 결정 및 상세 설명 |
+| [docs/DEV_TASKS.md](docs/DEV_TASKS.md) | 개발 작업 목록 및 진행 상황 |
+| [docs/UI_SPEC.md](docs/UI_SPEC.md) | UI/UX 명세 및 화면 정의 |
+| [docs/CODE_REVIEW_AND_TESTING.md](docs/CODE_REVIEW_AND_TESTING.md) | 코드 리뷰 기준 및 테스트 전략 |
+| [docs/Planning.md](docs/Planning.md) | 프로젝트 기획 및 요구사항 정의 |
+
+---
+
+## 10. 향후 개선 아이디어
 
 - [ ] 검색 결과 정렬 / 필터 기능 (Stars, Updated 등)
 - [ ] GitHub Personal Access Token 설정으로 Rate Limit 증가
