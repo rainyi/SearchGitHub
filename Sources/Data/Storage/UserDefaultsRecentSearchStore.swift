@@ -44,7 +44,7 @@ final class UserDefaultsRecentSearchStore: RecentSearchStore {
             let data = try encoder.encode(items)
             userDefaults.set(data, forKey: Constants.storageKey)
         } catch {
-            throw AppError.decoding(error)
+            throw AppError.encoding(error)
         }
     }
 

@@ -32,6 +32,9 @@ enum AppError: Error, Equatable {
 
     // MARK: - 데이터
 
+    /// JSON 인코딩 실패
+    case encoding(Error)
+
     /// JSON 디코딩 실패
     case decoding(Error)
 
@@ -51,11 +54,10 @@ enum AppError: Error, Equatable {
             return true
         case (.invalidParameter, .invalidParameter):
             return true
+        case let (.encoding(lhsError), .encoding(rhsError)):
+            return areErrorsEqual(lhsError, rhsError)
         case let (.network(lhsError), .network(rhsError)):
-            let lhsNSError = lhsError as NSError
-            let rhsNSError = rhsError as NSError
-            return lhsNSError.domain == rhsNSError.domain &&
-                   lhsNSError.code == rhsNSError.code
+            return areErrorsEqual(lhsError, rhsError)
         case let (.rateLimit(lhsDate), .rateLimit(rhsDate)):
             return lhsDate == rhsDate
         case (.unauthorized, .unauthorized):
@@ -67,20 +69,22 @@ enum AppError: Error, Equatable {
         case let (.serverError(lhsCode), .serverError(rhsCode)):
             return lhsCode == rhsCode
         case let (.decoding(lhsError), .decoding(rhsError)):
-            let lhsNSError = lhsError as NSError
-            let rhsNSError = rhsError as NSError
-            return lhsNSError.domain == rhsNSError.domain &&
-                   lhsNSError.code == rhsNSError.code
+            return areErrorsEqual(lhsError, rhsError)
         case (.emptyResult, .emptyResult):
             return true
         case let (.unknown(lhsError), .unknown(rhsError)):
-            let lhsNSError = lhsError as NSError
-            let rhsNSError = rhsError as NSError
-            return lhsNSError.domain == rhsNSError.domain &&
-                   lhsNSError.code == rhsNSError.code
+            return areErrorsEqual(lhsError, rhsError)
         default:
             return false
         }
+    }
+
+    /// Error 타입 비교를 위한 헬퍼 (NSError bridging)
+    private static func areErrorsEqual(_ lhs: Error, _ rhs: Error) -> Bool {
+        let lhsNSError = lhs as NSError
+        let rhsNSError = rhs as NSError
+        return lhsNSError.domain == rhsNSError.domain &&
+               lhsNSError.code == rhsNSError.code
     }
 }
 
@@ -94,6 +98,9 @@ extension AppError: LocalizedError {
 
         case .invalidParameter:
             return "잘못된 입력입니다"
+
+        case .encoding:
+            return "데이터를 저장할 수 없습니다"
 
         case .network:
             return "인터넷 연결을 확인해 주세요"
@@ -132,7 +139,7 @@ extension AppError: LocalizedError {
         case .invalidParameter:
             return "입력값을 확인하고 다시 시도해주세요"
 
-        case .network, .invalidResponse, .decoding, .unknown, .serverError:
+        case .network, .invalidResponse, .encoding, .decoding, .unknown, .serverError:
             return "잠시 후 다시 시도해주세요"
 
         case .unauthorized, .forbidden:
@@ -162,7 +169,7 @@ extension AppError {
     /// 재시도 가능 여부
     var isRetryable: Bool {
         switch self {
-        case .network, .invalidResponse, .decoding, .rateLimit, .serverError:
+        case .network, .invalidResponse, .encoding, .decoding, .rateLimit, .serverError:
             return true
         case .emptyQuery, .emptyResult, .unknown, .unauthorized, .forbidden, .invalidParameter:
             return false

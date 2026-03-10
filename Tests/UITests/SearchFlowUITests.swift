@@ -28,9 +28,9 @@ final class SearchFlowUITests: XCTestCase {
         // 앱 실행
         app.launch()
 
-        // 앱이 정상적으로 실행되었는지 확인
-        let searchNavigation = app.navigationBars["GitHub 검색"]
-        XCTAssertTrue(searchNavigation.waitForExistence(timeout: 10), "검색 화면이 표시되어야 함")
+        // 앱이 정상적으로 실행되었는지 확인 (Heading "Search" 확인)
+        let searchTitle = app.staticTexts["Search"]
+        XCTAssertTrue(searchTitle.waitForExistence(timeout: 10), "검색 화면이 표시되어야 함")
     }
 
     override func tearDownWithError() throws {
@@ -44,9 +44,9 @@ final class SearchFlowUITests: XCTestCase {
 
     /// 앱이 정상적으로 실행되는지 테스트
     func testAppLaunch() throws {
-        // Then: 검색 화면이 표시됨
-        let searchNavigation = app.navigationBars["GitHub 검색"]
-        XCTAssertTrue(searchNavigation.waitForExistence(timeout: 10), "검색 화면이 표시되어야 함")
+        // Then: 검색 화면이 표시됨 (Heading "Search" 확인)
+        let searchTitle = app.staticTexts["Search"]
+        XCTAssertTrue(searchTitle.waitForExistence(timeout: 10), "검색 화면이 표시되어야 함")
     }
 
     /// 검색 필드가 존재하는지 테스트
@@ -56,11 +56,11 @@ final class SearchFlowUITests: XCTestCase {
         XCTAssertTrue(searchField.waitForExistence(timeout: 10), "검색 필드가 존재해야 함")
     }
 
-    /// 검색 버튼이 존재하는지 테스트
-    func testSearchButtonExists() throws {
-        // Then: 검색 버튼이 존재함
-        let searchButton = app.buttons["검색"]
-        XCTAssertTrue(searchButton.waitForExistence(timeout: 10), "검색 버튼이 존재해야 함")
+    /// 검색 필드가 존재하는지 테스트
+    func testSearchFieldWithIdentifierExists() throws {
+        // Then: searchTextField 식별자를 가진 검색 필드가 존재함
+        let searchField = app.textFields["searchTextField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 10), "searchTextField가 존재해야 함")
     }
 
     // MARK: - Search Flow Tests
@@ -68,29 +68,28 @@ final class SearchFlowUITests: XCTestCase {
     /// 검색어 입력 후 검색 실행
     func testSearchFlow() throws {
         // Given: 검색 화면
-        let searchField = app.textFields.firstMatch
+        let searchField = app.textFields["searchTextField"]
         XCTAssertTrue(searchField.waitForExistence(timeout: 10))
 
         // When: 검색어 입력
         searchField.tap()
         searchField.typeText("swift")
 
-        // And: 검색 버튼 탭
-        let searchButton = app.buttons["검색"]
-        searchButton.tap()
+        // And: 키보드 검색 버튼으로 검색 실행 (한국어 키보드)
+        app.keyboards.buttons["Search"].tap()
 
-        // Then: 결과 화면으로 이동 (타이틀 변경 확인)
-        let resultNavigation = app.navigationBars["swift"]
-        XCTAssertTrue(resultNavigation.waitForExistence(timeout: 15), "결과 화면으로 이동해야 함")
+        // Then: 결과 리스트 표시됨 (ScrollView + LazyVStack 구조)
+        let resultScrollView = app.scrollViews.firstMatch
+        XCTAssertTrue(resultScrollView.waitForExistence(timeout: 15), "결과 리스트가 표시되어야 함")
     }
 
     /// 검색 결과 리스트가 표시되는지 테스트
     func testSearchResultsList() throws {
         // Given: 검색 실행
-        let searchField = app.textFields.firstMatch
+        let searchField = app.textFields["searchTextField"]
         searchField.tap()
         searchField.typeText("swift")
-        app.buttons["검색"].tap()
+        app.keyboards.buttons["Search"].tap()
 
         // Then: 결과 리스트 표시
         let resultList = app.collectionViews.firstMatch
@@ -100,17 +99,17 @@ final class SearchFlowUITests: XCTestCase {
     /// 결과 셀 탭 시 WebView로 이동
     func testTapResultCell() throws {
         // Given: 검색 결과 표시
-        let searchField = app.textFields.firstMatch
+        let searchField = app.textFields["searchTextField"]
         searchField.tap()
         searchField.typeText("swift")
-        app.buttons["검색"].tap()
+        app.keyboards.buttons["Search"].tap()
 
-        // When: 첫 번째 셀 탭
-        let firstCell = app.collectionViews.cells.firstMatch
+        // When: 첫 번째 셀 탭 (ScrollView 낸 LazyVStack 셀)
+        let firstCell = app.scrollViews.firstMatch.cells.firstMatch
         XCTAssertTrue(firstCell.waitForExistence(timeout: 15))
         firstCell.tap()
 
-        // Then: WebView 화면으로 이동
+        // Then: WebView 화면으로 이동 (NavigationBar "저장소 상세" 확인)
         let webViewNavigation = app.navigationBars["저장소 상세"]
         XCTAssertTrue(webViewNavigation.waitForExistence(timeout: 10), "WebView로 이동해야 함")
     }
@@ -120,30 +119,27 @@ final class SearchFlowUITests: XCTestCase {
     /// 최근 검색어가 저장되는지 테스트
     func testRecentSearchSaved() throws {
         // Given: 검색 실행
-        let searchField = app.textFields.firstMatch
+        let searchField = app.textFields["searchTextField"]
         searchField.tap()
         searchField.typeText("swift")
-        app.buttons["검색"].tap()
+        app.keyboards.buttons["Search"].tap()
 
-        // When: 뒤로 가기
-        app.navigationBars.buttons.firstMatch.tap()
-
-        // Then: 최근 검색어에 "swift" 표시
-        let recentSearch = app.staticTexts["swift"]
+        // Then: 검색 필드 아래 최근 검색어 영역에 "swift" 표시
+        // 최근 검색어는 검색 후 같은 화면에서 확인 가능
+        let recentSearch = app.staticTexts["swift"].firstMatch
         XCTAssertTrue(recentSearch.waitForExistence(timeout: 10), "최근 검색어에 표시되어야 함")
     }
 
     /// 전체 삭제 버튼 테스트
     func testClearAllButton() throws {
-        // Given: 검색 실행 후 뒤로 가기
-        let searchField = app.textFields.firstMatch
+        // Given: 검색 실행
+        let searchField = app.textFields["searchTextField"]
         searchField.tap()
         searchField.typeText("swift")
-        app.buttons["검색"].tap()
-        app.navigationBars.buttons.firstMatch.tap()
+        app.keyboards.buttons["Search"].tap()
 
         // "swift" 텍스트가 존재하는지 확인
-        let recentSearch = app.staticTexts["swift"]
+        let recentSearch = app.staticTexts["swift"].firstMatch
         XCTAssertTrue(recentSearch.waitForExistence(timeout: 10))
 
         // When: 전체 삭제 버튼 탭
@@ -158,24 +154,25 @@ final class SearchFlowUITests: XCTestCase {
 
     // MARK: - Empty State Tests
 
-    /// 빈 검색어로 검색 시 결과 화면으로 이동하지 않음
+    /// 빈 검색어로 검색 시 결과 리스트가 표시되지 않음
     func testEmptyQuery() throws {
-        // When: 빈 검색어로 검색
-        let searchButton = app.buttons["검색"]
-        searchButton.tap()
+        // When: 빈 검색어로 검색 (Return 키 누르기)
+        let searchField = app.textFields["searchTextField"]
+        searchField.tap()
+        app.keyboards.buttons["Search"].tap()
 
-        // Then: 여전히 검색 화면에 머무름
-        let searchNavigation = app.navigationBars["GitHub 검색"]
-        XCTAssertTrue(searchNavigation.exists, "검색 화면에 머물러 있어야 함")
+        // Then: 결과 리스트가 표시되지 않음 (초기 상태 유지)
+        let searchTitle = app.staticTexts["Search"]
+        XCTAssertTrue(searchTitle.exists, "검색 화면에 머물러 있어야 함")
     }
 
     /// 존재하지 않는 검색어로 검색 시 빈 결과 표시
     func testEmptyResults() throws {
         // Given: 존재하지 않는 검색어 입력
-        let searchField = app.textFields.firstMatch
+        let searchField = app.textFields["searchTextField"]
         searchField.tap()
         searchField.typeText("xyzabc123nonexistent")
-        app.buttons["검색"].tap()
+        app.keyboards.buttons["Search"].tap()
 
         // Then: 빈 결과 메시지 표시
         let emptyMessage = app.staticTexts["검색 결과가 없습니다"]
@@ -211,18 +208,12 @@ final class SearchFlowUITests: XCTestCase {
         // 검색어 입력
         searchField.typeText(query)
 
-        // 검색 버튼 탭
-        let searchButton = app.buttons["searchButton"]
-        XCTAssertTrue(searchButton.waitForExistence(timeout: 5), "검색 버튼이 존재해야 함")
-        searchButton.tap()
+        // 키보드 Return 키로 검색 실행
+        app.keyboards.buttons["Search"].tap()
 
-        // 결과 화면 확인
-        let resultNavigation = app.navigationBars[query]
-        XCTAssertTrue(resultNavigation.waitForExistence(timeout: 15), "'\(query)' 검색 결과 화면으로 이동해야 함")
-
-        // 결과 리스트 표시 확인
-        let resultList = app.collectionViews.firstMatch
-        XCTAssertTrue(resultList.waitForExistence(timeout: 10), "결과 리스트가 표시되어야 함")
+        // 결과 리스트 표시 확인 (ScrollView + LazyVStack 구조)
+        let resultScrollView = app.scrollViews.firstMatch
+        XCTAssertTrue(resultScrollView.waitForExistence(timeout: 15), "'\(query)' 검색 결과 리스트가 표시되어야 함")
 
         // 스크린샷 캡처
         let screenshot = app.screenshot()
@@ -242,22 +233,21 @@ final class SearchFlowUITests: XCTestCase {
         let searchQueries = ["ios", "android", "flutter", "reactnative"]
 
         for query in searchQueries {
-            let searchField = app.textFields.firstMatch
+            let searchField = app.textFields["searchTextField"]
             XCTAssertTrue(searchField.waitForExistence(timeout: 10))
 
             searchField.tap()
             searchField.clearText()
             searchField.typeText(query)
 
-            app.buttons["검색"].tap()
+            app.keyboards.buttons["Search"].tap()
 
-            // 결과 화면 확인
-            let resultNavigation = app.navigationBars[query]
-            XCTAssertTrue(resultNavigation.waitForExistence(timeout: 15))
+            // 결과 리스트 표시 확인 (ScrollView + LazyVStack 구조)
+            let resultScrollView = app.scrollViews.firstMatch
+            XCTAssertTrue(resultScrollView.waitForExistence(timeout: 15), "'\(query)' 검색 결과가 표시되어야 함")
 
-            // 1초 대기 후 뒤로 가기
+            // 1초 대기 후 다음 검색어로
             sleep(1)
-            app.navigationBars.buttons.firstMatch.tap()
         }
     }
 }

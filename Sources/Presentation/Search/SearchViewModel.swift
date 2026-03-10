@@ -109,8 +109,13 @@ final class SearchViewModel: ObservableObject {
             let result = try await searchUseCase.execute(keyword: trimmedQuery, page: currentPage)
             repositories.append(contentsOf: result.repositories)
             hasNextPage = result.hasNextPage
+        } catch _ as AppError {
+            currentPage -= 1
+            // 페이지네이션 에러는 사용자에게 표시하지 않고 조용히 처리
+            // (이미 일부 결과가 표시 중이므로 중단하지 않음)
         } catch {
             currentPage -= 1
+            // 예상치 못한 에러 타입
         }
 
         isLoadingMore = false
@@ -180,8 +185,8 @@ final class SearchViewModel: ObservableObject {
 
             let trimmedQuery = self.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
-            // 2글자 이상일 때만 자동완성 표시
-            guard trimmedQuery.count >= 2 else {
+            // 1글자 이상일 때만 자동완성 표시
+            guard trimmedQuery.count >= 1 else {
                 self.autocompleteSuggestions = []
                 return
             }

@@ -17,7 +17,7 @@ let package = Package(
         .target(
             name: "GitHubSearch",
             path: "Sources",
-            exclude: [],
+            exclude: ["App"],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency")
             ]

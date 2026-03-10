@@ -309,7 +309,7 @@ final class SearchViewModelTests: XCTestCase {
         XCTAssertEqual(sut.autocompleteSuggestions[1].query, "swiftui")
     }
 
-    func testAutocomplete_WhenQueryLessThan2Chars_ThenNoSuggestions() async {
+    func testAutocomplete_WhenQueryLessThan1Chars_ThenNoSuggestions() async {
         // Given
         let items = [
             RecentSearchItem(query: "swift", searchedAt: Date())
@@ -318,7 +318,7 @@ final class SearchViewModelTests: XCTestCase {
         await sut.onAppear()
 
         // When
-        sut.searchQuery = "s"
+        sut.searchQuery = ""
 
         // Then
         XCTAssertTrue(sut.autocompleteSuggestions.isEmpty)

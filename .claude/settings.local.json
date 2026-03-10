@@ -54,7 +54,10 @@
       "Bash(xcodegen generate:*)",
       "mcp__plugin_context-mode_context-mode__ctx_execute",
       "Bash(/Users/rainyi/Documents/Project/Study/SearchGitHub/GitHubSearch.xcworkspace/contents.xcworkspacedata:*)",
-      "Bash(tuist generate:*)"
+      "Bash(tuist generate:*)",
+      "Bash(xxd:*)",
+      "Bash(tuist version:*)",
+      "Bash(cp:*)"
     ]
   }
 }
