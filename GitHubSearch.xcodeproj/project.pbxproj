@@ -20,7 +20,6 @@
 		4820F56EFF62294F0528D90E /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C67D463A07EFEA47FEB8F1A1 /* AppRouter.swift */; };
 		48D4B5E37B1792207A70BDE5 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AF9196841535623414BC09 /* SearchView.swift */; };
 		4976BEF91391CDF11E2AB5AF /* GitHubRepositoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFFCCE8A0707B964BC07F57 /* GitHubRepositoryRepository.swift */; };
-		54FD85FB5CC776ABF097BADC /* ResultListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E128D0C685B420CAEFA155 /* ResultListViewModelTests.swift */; };
 		58D1C4FA213B16330AEF45C6 /* EmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 083EAD84E20D32C01F741A29 /* EmptyView.swift */; };
 		6C9220EE7AAFCE28953BD60C /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1ED0DD69DCFF90CC912E08 /* ErrorView.swift */; };
 		72276DA955FFB9ADF57904F8 /* RepositoryWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5C84C28C3430F77D8D9B68 /* RepositoryWebView.swift */; };
@@ -95,7 +94,6 @@
 /* Begin PBXFileReference section */
 		083EAD84E20D32C01F741A29 /* EmptyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyView.swift; sourceTree = "<group>"; };
 		196288F724BCA5EEBEADBF9C /* AppRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouterTests.swift; sourceTree = "<group>"; };
-		21E128D0C685B420CAEFA155 /* ResultListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultListViewModelTests.swift; sourceTree = "<group>"; };
 		3060C2C5AFD7D71B61646477 /* RepositoryListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryListCell.swift; sourceTree = "<group>"; };
 		31D5B41A74A18E6E4BA505C8 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
 		336576F86330A6A73A1BB888 /* GitHubSearchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitHubSearchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -118,7 +116,7 @@
 		6750FF08F711507DE1B5D482 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		6FFFCCE8A0707B964BC07F57 /* GitHubRepositoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubRepositoryRepository.swift; sourceTree = "<group>"; };
 		7448ECF38F318223BD7EF639 /* RecentSearchUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchUseCase.swift; sourceTree = "<group>"; };
-		75908C334A3B8E3543EDF572 /* GitHubSearchApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GitHubSearchApp-Info.plist"; sourceTree = "<group>"; };
+		75908C334A3B8E3543EDF572 /* GitHubSearch-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GitHubSearch-Info.plist"; sourceTree = "<group>"; };
 		7820D73E43F8F7AFF562F15B /* GitHubSearchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitHubSearchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D0856DFD435DF1387B8286D /* GitHubAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubAPIClient.swift; sourceTree = "<group>"; };
 		7F510D22B336822C58C252BC /* RecentSearchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentSearchStore.swift; sourceTree = "<group>"; };
@@ -269,7 +267,6 @@
 			isa = PBXGroup;
 			children = (
 				196288F724BCA5EEBEADBF9C /* AppRouterTests.swift */,
-				21E128D0C685B420CAEFA155 /* ResultListViewModelTests.swift */,
 				85C72B9987B1E4F74209A79C /* SearchViewModelTests.swift */,
 			);
 			path = PresentationTests;
@@ -370,7 +367,7 @@
 		DED6628469596F3F350DC482 /* InfoPlists */ = {
 			isa = PBXGroup;
 			children = (
-				75908C334A3B8E3543EDF572 /* GitHubSearchApp-Info.plist */,
+				75908C334A3B8E3543EDF572 /* GitHubSearch-Info.plist */,
 				5124D0B21926ED5566E8510B /* GitHubSearchTests-Info.plist */,
 				982934653B5DB4435506EDA5 /* GitHubSearchUITests-Info.plist */,
 			);
@@ -580,7 +577,6 @@
 				EF2DD1A2FEE0C365FA0FDC9E /* RecentSearchUseCaseTests.swift in Sources */,
 				C95B2B6DD04036EC495BC3AE /* SearchRepositoriesUseCaseTests.swift in Sources */,
 				9221AE6BB60FD836582AD487 /* AppRouterTests.swift in Sources */,
-				54FD85FB5CC776ABF097BADC /* ResultListViewModelTests.swift in Sources */,
 				E438CA7C4DAC9491A1FA8559 /* SearchViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
