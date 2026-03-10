@@ -60,3 +60,10 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+mcp.json
+
+# Tuist
+Derived/
+
+# Temporary scripts
+auto_search_test.sh
