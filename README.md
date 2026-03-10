@@ -72,21 +72,21 @@ GitHubSearch-iOS/
 
 ### 레이어 의존 방향
 ```
-┌─────────────────────────────────────────┐
-│  Presentation Layer (SwiftUI)           │
-│  - SearchView, ViewModel                │
-│  - AppRouter (Navigation)               │
-├─────────────────────────────────────────┤
-│  Domain Layer                           │
-│  - UseCases (비즈니스 로직)              │
-│  - Entities (GitHubRepository 등)       │
-│  - Repository Interfaces                │
-├─────────────────────────────────────────┤
-│  Data Layer                             │
-│  - Repository Implementations           │
-│  - APIClient (GitHub API)               │
-│  - Storage (UserDefaults)               │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  Presentation Layer (SwiftUI)            │
+│  - SearchView, ViewModel                 │
+│  - AppRouter (Navigation)                │
+├──────────────────────────────────────────┤
+│  Domain Layer                            │
+│  - UseCases (비즈니스 로직)               │
+│  - Entities (GitHubRepository 등)        │
+│  - Repository Interfaces                 │
+├──────────────────────────────────────────┤
+│  Data Layer                              │
+│  - Repository Implementations            │
+│  - APIClient (GitHub API)                │
+│  - Storage (UserDefaults)                │
+└──────────────────────────────────────────┘
 ```
 
 ---
@@ -219,22 +219,22 @@ swift test
 ### Clean Architecture 레이어
 
 ```
-┌─────────────────────────────────────────┐
-│  Presentation Layer (SwiftUI)           │
-│  - SearchView, ResultListView           │
-│  - SearchViewModel, ResultListViewModel │
-│  - AppRouter (Navigation)               │
-├─────────────────────────────────────────┤
-│  Domain Layer                           │
-│  - UseCases (비즈니스 로직)              │
-│  - Entities (GitHubRepository 등)       │
-│  - Repository Interfaces                │
-├─────────────────────────────────────────┤
-│  Data Layer                             │
-│  - Repository Implementations           │
-│  - APIClient (GitHub API)               │
-│  - Storage (UserDefaults)               │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  Presentation Layer (SwiftUI)            │
+│  - SearchView, ResultListView            │
+│  - SearchViewModel, ResultListViewModel  │
+│  - AppRouter (Navigation)                │
+├──────────────────────────────────────────┤
+│  Domain Layer                            │
+│  - UseCases (비즈니스 로직)               │
+│  - Entities (GitHubRepository 등)        │
+│  - Repository Interfaces                 │
+├──────────────────────────────────────────┤
+│  Data Layer                              │
+│  - Repository Implementations            │
+│  - APIClient (GitHub API)                │
+│  - Storage (UserDefaults)                │
+└──────────────────────────────────────────┘
 ```
 
 ### 네비게이션 (Router 패턴)
@@ -284,7 +284,7 @@ GET https://api.github.com/search/repositories?q={keyword}&page={page}&per_page=
 | Reviewer | 코드 리뷰, /simplify 자동 검증 |
 | Tester | 테스트 코드 작성, 커버리지 분석 |
 
-**구체적인 프롬프트와 AI의 기여 내용**: [AI_ASSIST.md](AI_ASSIST.md) 참조
+**구체적인 프롬프트와 AI의 기여 내용**: [docs/AI_ASSIST.md](docs/AI_ASSIST.md) 참조
 
 ---
 
