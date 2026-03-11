@@ -67,3 +67,12 @@ Derived/
 
 # Temporary scripts
 auto_search_test.sh
+.claude/
+# macOS
+.DS_Store
+
+# SwiftPM
+.swiftpm/
+
+# Local tools
+.xcodebuildmcp/
