@@ -71,6 +71,7 @@ GitHubSearch-iOS/
 ```
 
 ### 레이어 의존 방향
+
 ```
 ┌──────────────────────────────────────────┐
 │  Presentation Layer (SwiftUI)            │
@@ -88,6 +89,26 @@ GitHubSearch-iOS/
 │  - Storage (UserDefaults)                │
 └──────────────────────────────────────────┘
 ```
+
+### 의존성 역전 예시 (Interface → Implementation)
+
+Domain Layer는 Interface(프로토콜)만 정의하고, Data Layer에서 Implementation을 제공합니다:
+
+```swift
+// Domain - Interface만 정의
+protocol GitHubRepositoryRepository {
+    func search(query: String, page: Int) async throws -> SearchResult<GitHubRepository>
+}
+
+// Data - Implementation 제공
+final class GitHubRepositoryRepositoryImpl: GitHubRepositoryRepository { ... }
+```
+
+**실제 구현 파일:**
+- Interface: [`Sources/Domain/Repositories/GitHubRepositoryRepository.swift`](Sources/Domain/Repositories/GitHubRepositoryRepository.swift)
+- Implementation: [`Sources/Data/Repositories/GitHubRepositoryRepositoryImpl.swift`](Sources/Data/Repositories/GitHubRepositoryRepositoryImpl.swift)
+
+**장점:** Domain Layer는 Implementation의 존재를 몰라도 되며, 테스트 시 Mock으로 쉽게 교체 가능합니다.
 
 ---
 
@@ -234,36 +255,38 @@ swift test
 # Package.swift를 Xcode에서 연 후 Cmd + U
 ```
 
+### 코드 커버리지 확인
+
+```bash
+# 1. 커버리지 활성화하여 테스트 실행
+swift test --enable-code-coverage
+
+# 2. .xcresult 파일 경로 확인 (보통 .build/debug/codecov 폴터 내)
+# 3. Xcode에서 열기
+cmd + shift + 7  # Report Navigator
+# 또는 .xcresult 파일 더블클릭
+```
+
+**Xcode에서 커버리지 보기:**
+1. `Cmd + Shift + 7` 로 Report Navigator 열기
+2. 최근 테스트 실행 선택 → Coverage 탭 클릭
+3. 파일별/함수별 커버리지 확인 가능
+
+커버리지 목표는 [CODE_REVIEW_AND_TESTING.md](docs/CODE_REVIEW_AND_TESTING.md)를 참조하세요.
+
 ---
 
 ## 6. 아키텍처 / 설계
 
-### Clean Architecture 레이어
-
-```
-┌──────────────────────────────────────────┐
-│  Presentation Layer (SwiftUI)            │
-│  - SearchView, ResultListView            │
-│  - SearchViewModel, ResultListViewModel  │
-│  - AppRouter (Navigation)                │
-├──────────────────────────────────────────┤
-│  Domain Layer                            │
-│  - UseCases (비즈니스 로직)               │
-│  - Entities (GitHubRepository 등)        │
-│  - Repository Interfaces                 │
-├──────────────────────────────────────────┤
-│  Data Layer                              │
-│  - Repository Implementations            │
-│  - APIClient (GitHub API)                │
-│  - Storage (UserDefaults)                │
-└──────────────────────────────────────────┘
-```
-
 ### 네비게이션 (Router 패턴)
 
-- `AppRoute`: 화면 목적지를 enum으로 정의 (`repositoryDetail(url:)`)
-- `AppRouter`: `NavigationPath`를 관리하며 push/pop 메서드 제공
-- ViewModel은 Router를 통해 네비게이션 트리거
+Router 패턴에 대한 상세 설계는 [ARCHITECT.md](docs/ARCHITECT.md)를 참조하세요.
+
+**구성 요소:**
+- `AppRoute`: 화면 목적지를 enum으로 정의 ([`AppRoute.swift`](Sources/Presentation/Router/AppRoute.swift))
+- `AppRouter`: `NavigationPath`를 관리 ([`AppRouter.swift`](Sources/Presentation/Router/AppRouter.swift))
+
+**사용 이유:** 테스트 용이성, 책임 분리, ViewModel 재사용성
 
 ### 비즈니스 로직
 
@@ -292,6 +315,15 @@ GET https://api.github.com/search/repositories?q={keyword}&page={page}&per_page=
 - GitHub API는 **Rate Limit**가 있습니다 (인증 없이 60요청/시간)
 - `X-RateLimit-Remaining`, `X-RateLimit-Reset` 헤더 확인
 - 과도한 검색은 403 Forbidden 반환 가능
+
+### Rate Limit 대응
+
+Rate Limit 발생 시 `ErrorView` 컴포넌트로 사용자에게 친화적인 에러 메시지를 표시합니다.
+
+**관련 파일:**
+- 에러 정의: [`Sources/Domain/Errors/AppError.swift`](Sources/Domain/Errors/AppError.swift)
+- 에러 표시 UI: [`Sources/Presentation/Components/ErrorView.swift`](Sources/Presentation/Components/ErrorView.swift)
+- 상세 전략: [ARCHITECT.md](docs/ARCHITECT.md) Section 2.4
 
 ---
 
@@ -335,6 +367,6 @@ GET https://api.github.com/search/repositories?q={keyword}&page={page}&per_page=
 
 ---
 
-## 10. 라이선스
+## 11. 라이선스
 
 MIT License
